@@ -31,11 +31,11 @@ __Pre-installation:__
 It is recommended to have the stable over dev branch.  
 
 2. `ffmpeg installed` and in your PATH.  
-Allows the bot to join voice as well as speak. 
+Allows the bot to join voice as well as speak.
 * Download the ffmpeg package for your system.
 * Extract it to the proper place.
-* Set it to your PATH environment variables. 
-  
+* Set it to your PATH environment variables.
+
 3. `npm install node-opus` or `npm install opusscript`  
 Required for voice. Discord _prefers_ node-opus, but it is your choice.
 
@@ -43,7 +43,7 @@ __Installation:__
 * `npm install discord.js-musicbot-addon`
 
 __Common installation issues:__  
-__Issue:__ FFMPEG was not found on your system. 
+__Issue:__ FFMPEG was not found on your system.
 __Fix:__ Make sure ffmpeg is installed correctly and set in your PATH variable.  
 
 __Issue:__ Couldn't find an Opus engine.  
@@ -60,6 +60,10 @@ __Fix:__ This one is a little more complicated.
 
 If that doesn't fix your issue;  
 1. Download and install the [Windows 8.1 SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-8-1-sdk)  
+
+__Issue:__ `ffluent-ffmpeg` errors.
+1. Download and install ffmpeg correctly for your OS.
+2. Make sure it's in your PATH/exported.  
 
 ***
 # Examples & Options
@@ -80,30 +84,43 @@ const music = new Music(<client>,
 ```
 
 __Most options are optional and thus not needed.__  
-The options you can pass in music(client, options) is as followed:  
-* prefix: Prefix to set for commands.  
-* global: true/false. If set to true, will use global queues, false will use server. (default false)  
-* maxQueueSize: Max size of queues.
-* anyoneCanSkip: Whether or not anyone can skip, true/false. Defaults false.
-* anyoneCanAdjust: Whether or not anyone can set volume. Defaults false.
-* clearInvoker: Whether or not to clear the command message.
-* volume: Default volume. Anywhere from 1 to 200, default is 50.
-* helpCmd: Name of the help command.
-* playCmd: Sets the play command name.
-* skipCmd: Sets the skip command name.
-* queueCmd: Sets the queue command name.
-* pauseCmd: Sets the name for the pause command.
-* resumeCmd: Sets the name for the resume command.
-* volumeCmd: Sets the name for the volume command.
-* leaveCmd: Sets the name for the leave command.
-* clearCmd: Sets the name for the clearqueue command.
-* enableQueueStat: Disables or enables queue status (useful to prevent errors sometimes, defaults true).
-* ownerOverMember: Makes it so you bypass restrictions from the bot.
-* botOwner: ID of your account, __required__ if using ownerOverMember.
-* logging: Disable/enable some extra, none need logging. Defaults to true. Useful but not needed.
-* __youtubeKey:__ This is __REQUIRED__. Something [like this article](https://elfsight.com/help/how-to-get-youtube-api-key/) should help with that, or google how to get a YouTube API3 key.  
+The options you can pass in `music(client, {options})` and their types is as followed:  
+* youtubeKey: *Required*, string, a YouTube API3 key.
+* botPrefix: String, the prefix of the bot. Defaults to "!".
+* global: Boolean, whether to use one global queue or server specific ones. Defaults false.
+* maxQueueSize: Number, max queue size allowed. Defaults 20.
+* defVolume: Number, the default volume of music. 1 - 200, defaults 50.
+* anyoneCanSkip: Boolean, whether or not anyone can skip. Defaults false.
+* clearInvoker: Boolean, whether to delete command messages. Defaults false.
+* helpCmd: String, name of the help command.
+* enableHelp: Boolean, whether to enable the help command or not.
+* playCmd: String, name of the play command.
+* enablePlay: Boolean, whether to enable the play command or not.
+* skipCmd: String, name of the skip command.
+* enableSkip: Boolean, whether to enable the skip command or not.
+* queueCmd: String, name of the queue command.
+* enableQueue: Boolean, whether to enable the queue command or not.
+* pauseCmd: String, name of the pause command.
+* enablePause: Boolean, whether to enable the pause command or not.
+* resumeCmd: String, name of the resume command.
+* enableResume: Boolean, whether to enable the resume command or not.
+* volumeCmd: String, name of the volume command.
+* enableVolume: Boolean, whether to enable the volume command or not.
+* leaveCmd: String, name of the leave command.
+* enableLeave: Boolean, whether to enable the leave command or not.
+* clearCmd: String, name of the clear command.
+* enableClear: Boolean, whether to enable the clearqueue command or not.
+* loopCmd: String, name of the loop command.
+* enableLoop: Boolean, whether to enable the loop command or not.
+* enableQueueStat: Boolean, whether to enable the queue status, old fix for an error that probably won't occur.
+* anyoneCanAdjust: Boolean, whether anyone can adjust volume. Defaults false.
+* ownerOverMember: Boolean, whether the owner over-rides CanAdjust and CanSkip. Defaults false.
+* botOwner: String, the ID of the Discord user to be seen as the owner. Required if using ownerOverMember.
+* logging: Boolean, some extra none needed logging (such as caught errors that didn't crash the bot, etc). Defaults false.  
 
-An example of a few custom commands would be:  
+For the youtube API3 key, something [like this article](https://elfsight.com/help/how-to-get-youtube-api-key/) should help with that, or google how to get a YouTube API3 key from the Google console.  
+
+An example of a few custom options would be:  
 ```javascript
 const music = new Music(client, {
   prefix: ">",
@@ -113,6 +130,7 @@ const music = new Music(client, {
   playCmd: 'music',
   leaveCmd: 'begone',
   ownerOverMember: true,
+  enableClear: false,
   botOwner: '1234567890',
   youtubeKey: 'some-key_here'
 });
@@ -123,12 +141,19 @@ Again if you have any issues, feel free to open one on the repo, or join my [Dis
 ***
 # Changelog
 ***  
+## 1.6
+* Removed asynchronous functions.
+* Added enabling/disabling commands.
+* Added looping.
+* "Class" update.
+* Fixed some errors/bugs from 1.5.  
+
 ## 1.5.1
 * Added playlist support (thanks Rodabaugh for reminding me).
 * Fixed `clearqueue` crashing if queue is empty.
 * Fixed `skip` crashing if the queue is empty.
 * Now requires `ffmpeg` installed over `ffmpeg-binaries`.  
-  
+
 ## 1.4.0  
 * Added wrapping.
 * Added owner over member options.
