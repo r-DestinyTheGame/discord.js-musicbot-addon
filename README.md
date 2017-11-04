@@ -117,7 +117,17 @@ The options you can pass in `music(client, {options})` and their types is as fol
 * ownerOverMember: Boolean, whether the owner over-rides CanAdjust and CanSkip. Defaults false.
 * botOwner: String, the ID of the Discord user to be seen as the owner. Required if using ownerOverMember.
 * logging: Boolean, some extra none needed logging (such as caught errors that didn't crash the bot, etc). Defaults false.  
+* enableAliveMessage: Boolean, enables the bot to log a message in the console every x milliseconds.
+* aliveMessage: String, the message to be logged.\*_note_
+* aliveMessageTime: Number, time in _**milliseconds**_ the bot logs the message. Defaults to 600000 (5 minutes).
 
+\* defaut for aliveMessage looks like:
+```
+----------------------------------
+'BotUsername' online since 'lastReadyTime'!
+----------------------------------
+```
+  
 For the youtube API3 key, something [like this article](https://elfsight.com/help/how-to-get-youtube-api-key/) should help with that, or google how to get a YouTube API3 key from the Google console.  
 
 An example of a few custom options would be:  
@@ -142,11 +152,12 @@ Again if you have any issues, feel free to open one on the repo, or join my [Dis
 # Changelog
 ***  
 ## 1.6
-* Removed asynchronous functions.
+* Removed asynchronous functions since some people don't like using the latest and greatest.
 * Added enabling/disabling commands.
 * Added looping.
 * "Class" update.
 * Fixed some errors/bugs from 1.5.  
+* Added alive message function && (heh) options.
 
 ## 1.5.1
 * Added playlist support (thanks Rodabaugh for reminding me).
@@ -158,8 +169,8 @@ Again if you have any issues, feel free to open one on the repo, or join my [Dis
 * Added wrapping.
 * Added owner over member options.
 * Fixed errors.  
-* Reworked the the playing music method.
-* Fixed (probably) UnknownSpawn errors.
+* Reworked the playing music method.
+* Fixed `UnknownSpawn` errors.
 * Bot now requires your own YouTube Data API3 key for searching.
 * Music is less likely to cut out now.
 * Volume works again (again).
