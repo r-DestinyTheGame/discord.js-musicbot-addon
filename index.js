@@ -53,33 +53,23 @@ module.exports = function (client, options) {
 			this.defVolume = parseInt((options && options.volume) || 50);
 			this.anyoneCanSkip = (options && options.anyoneCanSkip) || false;
 			this.clearInvoker = (options && options.clearInvoker) || false;
-			this.helpCmd = (options && options.helpCmd) || 'clienthelp';
-			this.enableHelp = (options && options.enableHelp) || true;
+			this.helpCmd = (options && options.helpCmd) || 'musichelp';
 			this.playCmd = (options && options.playCmd) || 'play';
-			this.enablePlay = (options && options.enablePlay) || true;
 			this.skipCmd = (options && options.skipCmd) || 'skip';
-			this.enableSkip = (options && options.enableSkip) || true;
 			this.queueCmd = (options && options.queueCmd) || 'queue';
-			this.enableQueue = (options && options.enableQueue) || true;
 			this.pauseCmd = (options && options.pauseCmd) || 'pause';
-			this.enablePause = (options && options.enablePause) || true;
 			this.resumeCmd = (options && options.resumeCmd) || 'resume';
-			this.enableResume = (options && options.enableResume) || true;
 			this.volumeCmd = (options && options.volumeCmd) || 'volume';
-			this.enableVolume = (options && options.enableVolume) || true;
 			this.leaveCmd = (options && options.leaveCmd) || 'leave';
-			this.enableLeave = (options && options.enableLeave) || true;
 			this.clearCmd = (options && options.clearCmd) || 'clearqueue';
-			this.enableClear = (options && options.enableClear) || true;
 			this.loopCmd = (options && options.loopCmd) || 'loop';
-			this.enableLoop = (options && options.enableLoop) || true;
 			this.enableQueueStat = (options && options.enableQueueStat) || true;
 			this.anyoneCanAdjust = (options && options.anyoneCanAdjust) || false;
 			this.ownerOverMember = (options && options.ownerOverMember) || false;
 			this.botOwner = (options && options.botOwner) || null;
-			this.logging = (options && options.logging) || true;
+			this.logging = (options && options.logging) || false;
 			this.enableAliveMessage = (options && options.enableAliveMessage) || false;
-			this.aliveMessage = (options && options.aliveMessage) || "----------------------------------\n"+client.user.username+" online since "+client.readyAt+"!"+"\n----------------------------------";
+			this.aliveMessage = (options && options.aliveMessage) || "";
 			this.aliveMessageTime = (options && options.aliveMessageTime) || 600000;
 			this.loop = "false";
 		}
@@ -176,82 +166,82 @@ module.exports = function (client, options) {
 			console.log(new TypeError(`helpCmd must be a string`));
 			process.exit(1);
 		};
-		if (typeof musicbot.enableHelp !== 'boolean') {
-			console.log(new TypeError(`enableHelp must be a boolean`));
-			process.exit(1);
-		};
+		// if (typeof musicbot.enableHelp !== 'boolean') {
+		// 	console.log(new TypeError(`enableHelp must be a boolean`));
+		// 	process.exit(1);
+		// };
 		if (typeof musicbot.playCmd !== 'string') {
 			console.log(new TypeError(`playCmd must be a string`));
 			process.exit(1);
 		};
-		if (typeof musicbot.enablePlay !== 'boolean') {
-			console.log(new TypeError(`enablePlay must be a boolean`));
-			process.exit(1);
-		};
+		// if (typeof musicbot.enablePlay !== 'boolean') {
+		// 	console.log(new TypeError(`enablePlay must be a boolean`));
+		// 	process.exit(1);
+		// };
 		if (typeof musicbot.skipCmd !== 'string') {
 			console.log(new TypeError(`skipCmd must be a string`));
 			process.exit(1);
 		};
-		if (typeof musicbot.enableSkip !== 'boolean') {
-			console.log(new TypeError(`enableSkip must be a boolean`));
-			process.exit(1);
-		};
+		// if (typeof musicbot.enableSkip !== 'boolean') {
+		// 	console.log(new TypeError(`enableSkip must be a boolean`));
+		// 	process.exit(1);
+		// };
 		if (typeof musicbot.queueCmd !== 'string') {
 			console.log(new TypeError(`queueCmd must be a string`));
 			process.exit(1);
 		};
-		if (typeof musicbot.enableQueue !== 'boolean') {
-			console.log(new TypeError(`enableQueue must be a boolean`));
-			process.exit(1);
-		};
+		// if (typeof musicbot.enableQueue !== 'boolean') {
+		// 	console.log(new TypeError(`enableQueue must be a boolean`));
+		// 	process.exit(1);
+		// };
 		if (typeof musicbot.pauseCmd !== 'string') {
 			console.log(new TypeError(`pauseCmd must be a string`));
 			process.exit(1);
 		};
-		if (typeof musicbot.enablePause !== 'boolean') {
-			console.log(new TypeError(`enablePause must be a boolean`));
-			process.exit(1);
-		};
+		// if (typeof musicbot.enablePause !== 'boolean') {
+		// 	console.log(new TypeError(`enablePause must be a boolean`));
+		// 	process.exit(1);
+		// };
 		if (typeof musicbot.resumeCmd !== 'string') {
 			console.log(new TypeError(`resumeCmd must be a string`));
 			process.exit(1);
 		};
-		if (typeof musicbot.enableResume !== 'boolean') {
-			console.log(new TypeError(`enableResume must be a boolean`));
-			process.exit(1);
-		};
+		// if (typeof musicbot.enableResume !== 'boolean') {
+		// 	console.log(new TypeError(`enableResume must be a boolean`));
+		// 	process.exit(1);
+		// };
 		if (typeof musicbot.volumeCmd !== 'string') {
 			console.log(new TypeError(`volumeCmd must be a string`));
 			process.exit(1);
 		};
-		if (typeof musicbot.enableVolume !== 'boolean') {
-			console.log(new TypeError(`enableVolume must be a boolean`));
-			process.exit(1);
-		};
+		// if (typeof musicbot.enableVolume !== 'boolean') {
+		// 	console.log(new TypeError(`enableVolume must be a boolean`));
+		// 	process.exit(1);
+		// };
 		if (typeof musicbot.leaveCmd !== 'string') {
 			console.log(new TypeError(`leaveCmd must be a string`));
 			process.exit(1);
 		};
-		if (typeof musicbot.enableLeave !== 'boolean') {
-			console.log(new TypeError(`enableLeave must be a boolean`));
-			process.exit(1);
-		};
+		// if (typeof musicbot.enableLeave !== 'boolean') {
+		// 	console.log(new TypeError(`enableLeave must be a boolean`));
+		// 	process.exit(1);
+		// };
 		if (typeof musicbot.clearCmd !== 'string') {
 			console.log(new TypeError(`clearCmd must be a string`));
 			process.exit(1);
 		};
-		if (typeof musicbot.enableClear !== 'boolean') {
-			console.log(new TypeError(`enableClear must be a boolean`));
-			process.exit(1);
-		};
+		// if (typeof musicbot.enableClear !== 'boolean') {
+		// 	console.log(new TypeError(`enableClear must be a boolean`));
+		// 	process.exit(1);
+		// };
 		if (typeof musicbot.loopCmd !== 'string') {
 			console.log(new TypeError(`loopCmd must be a string`));
 			process.exit(1);
 		};
-		if (typeof musicbot.enableLoop !== 'boolean') {
-			console.log(new TypeError(`enableLoop must be a boolean`));
-			process.exit(1);
-		};
+		// if (typeof musicbot.enableLoop !== 'boolean') {
+		// 	console.log(new TypeError(`enableLoop must be a boolean`));
+		// 	process.exit(1);
+		// };
 
 		//musicbot.enableQueueStat errors.
 		if (typeof musicbot.enableQueueStat !== 'boolean') {
@@ -297,34 +287,24 @@ module.exports = function (client, options) {
 			// Process the commands.
 			switch (command) {
 				case musicbot.helpCmd:
-					if (!musicbot.enableHelp) return;
 					return musicbothelp(msg, suffix);
 				case musicbot.playCmd:
-					if (!musicbot.enablePlay) return;
 					return play(msg, suffix);
 				case musicbot.skipCmd:
-					if (!musicbot.enableSkip) return;
 					return skip(msg, suffix);
 				case musicbot.queueCmd:
-					if (!musicbot.enableQueue) return;
 					return queue(msg, suffix);
 				case musicbot.pauseCmd:
-					if (!musicbot.enablePause) return;
 					return pause(msg, suffix);
 				case musicbot.resumeCmd:
-					if (!musicbot.enableResume) return;
 					return resume(msg, suffix);
 				case musicbot.volumeCmd:
-					if (!musicbot.enableVolume) return;
 					return volume(msg, suffix);
 				case musicbot.leaveCmd:
-					if (!musicbot.enableLeave) return;
 					return leave(msg, suffix);
 				case musicbot.clearCmd:
-					if (!musicbot.enableClear) return;
 					return clearqueue(msg, suffix);
 				case musicbot.loopCmd:
-					if (!musicbot.enableLoop) return;
 					return loop(msg, suffix);
 			}
 			if (musicbot.clearInvoker) {
@@ -338,6 +318,10 @@ module.exports = function (client, options) {
 	 */
 	 if (musicbot.enableAliveMessage) {
 		 setInterval(function liveMessage() {
+			 if (musicbot.aliveMessage.length < 2) {
+				 musicbot.aliveMessage = "----------------------------------\n"+client.user.username+" online since "+client.readyAt+"!"+"\n----------------------------------";
+			 }
+
 			 console.log(musicbot.aliveMessage);
 		 }, musicbot.aliveMessageTime);
 	 };
@@ -406,80 +390,71 @@ module.exports = function (client, options) {
 	 */
 	 function musicbothelp(msg, suffix) {
 		 if (!suffix || suffix.includes('help')) {
-			 if (!musicbot.enableHelp) return;
+			 console.log(musicbot);
 			 const embed = new Discord.RichEmbed();
 			 embed.setAuthor("Commands", msg.author.displayAvatarURL)
 			 embed.setDescription(`Commands with a * require Admin perms. Use \`${musicbot.botPrefix}musicbothelp command\` for help on usage.`)
-			 if (musicbot.enableHelp) embed.addField(musicbot.helpCmd, `Displays this text.`)
-			 if (musicbot.enablePlay) embed.addField(musicbot.playCmd, `Queue a song by url or search.`)
-			 if (musicbot.enableSkip) embed.addField(musicbot.skipCmd, `Skip a song or mutli songs.`)
-			 if (musicbot.enableQueue) embed.addField(musicbot.queueCmd, `Shows the current queue`)
-			 if (musicbot.enablePause) embed.addField(musicbot.pauseCmd, `* Pauses the queue.`)
-			 if (musicbot.enableResume) embed.addField(musicbot.resumeCmd, `* Resume the queue.`)
-			 if (musicbot.enableVolume) embed.addField(musicbot.volumeCmd, `* Adjusts the volume of the bot.`)
-			 if (musicbot.enableLeave) embed.addField(musicbot.leaveCmd, `Leave and clear the queue`)
-			 if (musicbot.enableClear) embed.addField(musicbot.clearCmd, `Clears the current queue.`)
+			 embed.addField(musicbot.helpCmd, `Displays this text.`)
+			 embed.addField(musicbot.playCmd, `Queue a song by url or search.`)
+			 embed.addField(musicbot.skipCmd, `Skip a song or mutli songs.`)
+			 embed.addField(musicbot.queueCmd, `Shows the current queue`)
+			 embed.addField(musicbot.pauseCmd, `* Pauses the queue.`)
+			 embed.addField(musicbot.resumeCmd, `* Resume the queue.`)
+			 embed.addField(musicbot.volumeCmd, `* Adjusts the volume of the bot.`)
+			 embed.addField(musicbot.leaveCmd, `Leave and clear the queue`)
+			 embed.addField(musicbot.clearCmd, `Clears the current queue.`)
 			 embed.setColor(0x27e33d)
 			 msg.channel.send({embed});
 		 } else {
 		 	if (suffix.includes(musicbot.playCmd)) {
-				if (!musicbot.enablePlay) return msg.channel.send(note('fail', `${suffix} is not a vlaid command!`));
 				const embed = new Discord.RichEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.playCmd}`, musicbot.user.avatarURL);
 				embed.setDescription(`Addes a song to the queue.\n**__Usage:__** ${musicbot.botPrefix}${musicbot.playCmd} Video URL | Playlist URL | search for something.`);
 				embed.setColor(0x27e33d);
 				msg.channel.send({embed});
 			} else if (suffix.includes(musicbot.skipCmd)) {
-				if (!musicbot.enableSkip) return msg.channel.send(note('fail', `${suffix} is not a vlaid command!`));
 				const embed = new Discord.RichEmbed();
 	 		 embed.setAuthor(`${musicbot.botPrefix}${musicbot.skipCmd}`, musicbot.user.avatarURL);
 	 		 embed.setDescription(`Skips the playing song or mutli songs. You must be the person that queued the song to skip it, or admin.\n**__Usage:__** ${musicbot.botPrefix}${musicbot.skipCmd} [numer of songs]`);
 			 embed.setColor(0x27e33d);
 	 		 msg.channel.send({embed});
 		 } else if (suffix.includes(musicbot.queueCmd)) {
-			 if (!musicbot.enableQueue) return msg.channel.send(note('fail', `${suffix} is not a vlaid command!`));
 			 const embed = new Discord.RichEmbed();
 			embed.setAuthor(`${musicbot.botPrefix}${musicbot.queueCmd}`, musicbot.user.avatarURL);
 			embed.setDescription(`Displays the current queue.`);
 			embed.setColor(0x27e33d);
 			msg.channel.send({embed});
 		} else if (suffix.includes(musicbot.pauseCmd)) {
-			if (!musicbot.enablePause) return msg.channel.send(note('fail', `${suffix} is not a vlaid command!`));
 			 const embed = new Discord.RichEmbed();
 			embed.setAuthor(`${musicbot.botPrefix}${musicbot.pauseCmd}`, musicbot.user.avatarURL);
 			embed.setDescription(`Pauses the current queue.`);
 			embed.setColor(0x27e33d);
 			msg.channel.send({embed});
 		} else if (suffix.includes(musicbot.resumeCmd)) {
-			if (!musicbot.enableResume) return msg.channel.send(note('fail', `${suffix} is not a vlaid command!`));
 			 const embed = new Discord.RichEmbed();
 			embed.setAuthor(`${musicbot.botPrefix}${musicbot.resumeCmd}`, musicbot.user.avatarURL);
 			embed.setDescription(`Resumes the current queue if paused.`);
 			embed.setColor(0x27e33d);
 			msg.channel.send({embed});
 		} else if (suffix.includes(musicbot.volumeCmd)) {
-			if (!musicbot.enableVolume) return msg.channel.send(note('fail', `${suffix} is not a vlaid command!`));
 			 const embed = new Discord.RichEmbed();
 			embed.setAuthor(`${musicbot.botPrefix}${musicbot.volumeCmd}`, musicbot.user.avatarURL);
 			embed.setDescription(`Adjusts the streams volume. Must be admin.\n**__Usage:__** ${musicbot.botPrefix}${musicbot.volumeCmd} <1 to 200>`);
 			embed.setColor(0x27e33d);
 			msg.channel.send({embed});
 		} else if (suffix.includes(musicbot.leaveCmd)) {
-			if (!musicbot.enableLeave) return msg.channel.send(note('fail', `${suffix} is not a vlaid command!`));
 			 const embed = new Discord.RichEmbed();
 			embed.setAuthor(`${musicbot.botPrefix}${musicbot.leaveCmd}`, musicbot.user.avatarURL);
 			embed.setDescription(`Leaves the voice channel and clears the queue.`);
 			embed.setColor(0x27e33d);
 			msg.channel.send({embed});
 		} else if (suffix.includes(musicbot.clearCmd)) {
-			if (!musicbot.enableClear) return msg.channel.send(note('fail', `${suffix} is not a vlaid command!`));
 			 const embed = new Discord.RichEmbed();
 			embed.setAuthor(`${musicbot.botPrefix}${musicbot.clearCmd}`, musicbot.user.avatarURL);
 			embed.setDescription(`Clears the current queue playing.`);
 			embed.setColor(0x27e33d);
 			msg.channel.send({embed});
 		} else if (suffix.includes(musicbot.loopCmd)) {
-			if (!musicbot.enableLoop) return msg.channel.send(note('fail', `${suffix} is not a vlaid command!`));
 			const embed = new Discord.RichEmbed();
 			embed.setAuthor(`${musicbot.botPrefix}${musicbot.loopCmd}`, musicbot.user.avatarURL);
 			embed.setDescription(`Enables/disables looping of the currently being played song.`);

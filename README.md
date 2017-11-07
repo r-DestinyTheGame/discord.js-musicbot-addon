@@ -1,4 +1,3 @@
-# Discord.js Music Bot Addon  
 [![npm package](https://nodei.co/npm/discord.js-musicbot-addon.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/discord.js-musicbot-addon/)  
 [![Discord Server](https://discordapp.com/api/guilds/360519133219127297/embed.png)](https://discord.gg/cADwxKs)  [![Downlaods](https://img.shields.io/npm/dt/discord.js-musicbot-addon.svg?maxAge=3600)](https://www.npmjs.com/package/discord.js-musicbot-addon)  [![Version](https://img.shields.io/npm/v/discord.js-musicbot-addon.svg?maxAge=3600)](https://www.npmjs.com/package/discord.js-musicbot-addon)
 ***
@@ -93,25 +92,15 @@ The options you can pass in `music(client, {options})` and their types is as fol
 * anyoneCanSkip: Boolean, whether or not anyone can skip. Defaults false.
 * clearInvoker: Boolean, whether to delete command messages. Defaults false.
 * helpCmd: String, name of the help command.
-* enableHelp: Boolean, whether to enable the help command or not.
 * playCmd: String, name of the play command.
-* enablePlay: Boolean, whether to enable the play command or not.
 * skipCmd: String, name of the skip command.
-* enableSkip: Boolean, whether to enable the skip command or not.
 * queueCmd: String, name of the queue command.
-* enableQueue: Boolean, whether to enable the queue command or not.
 * pauseCmd: String, name of the pause command.
-* enablePause: Boolean, whether to enable the pause command or not.
 * resumeCmd: String, name of the resume command.
-* enableResume: Boolean, whether to enable the resume command or not.
 * volumeCmd: String, name of the volume command.
-* enableVolume: Boolean, whether to enable the volume command or not.
 * leaveCmd: String, name of the leave command.
-* enableLeave: Boolean, whether to enable the leave command or not.
 * clearCmd: String, name of the clear command.
-* enableClear: Boolean, whether to enable the clearqueue command or not.
 * loopCmd: String, name of the loop command.
-* enableLoop: Boolean, whether to enable the loop command or not.
 * enableQueueStat: Boolean, whether to enable the queue status, old fix for an error that probably won't occur.
 * anyoneCanAdjust: Boolean, whether anyone can adjust volume. Defaults false.
 * ownerOverMember: Boolean, whether the owner over-rides CanAdjust and CanSkip. Defaults false.
@@ -127,7 +116,7 @@ The options you can pass in `music(client, {options})` and their types is as fol
 'BotUsername' online since 'lastReadyTime'!
 ----------------------------------
 ```
-  
+
 For the youtube API3 key, something [like this article](https://elfsight.com/help/how-to-get-youtube-api-key/) should help with that, or google how to get a YouTube API3 key from the Google console.  
 
 An example of a few custom options would be:  
@@ -158,6 +147,9 @@ Again if you have any issues, feel free to open one on the repo, or join my [Dis
 * "Class" update.
 * Fixed some errors/bugs from 1.5.  
 * Added alive message function && (heh) options.
+* Removed enabling/disabling commands until further notice.
+* Added all additions from pull requests to the main npm module.
+* Updated examples.
 
 ## 1.5.1
 * Added playlist support (thanks Rodabaugh for reminding me).
