@@ -718,18 +718,37 @@ module.exports = function (client, options) {
 			return msg.member.user.send(note('fail', 'This command can only be run in the #music-discussion channel.'));
 		}
 
-		// Get the queue.
-		const queue = getQueue(msg.guild.id);
+		try {
+			// Get the queue.
+			const queue = getQueue(msg.guild.id);
 
-		// Get the queue text.
-		const text = queue.map((video, index) => (
-			(index + 1) + ': ' + video.title
-		)).join('\n');
-		if (text.length > 1900) {
-			const newText = text.substr(0, 1899);
-			const otherText = text.substr(1900, text.length);
-			if (otherText.length > 1900) {
-				msg.channel.send(note('wrap', 'Queue ('+ queueStatus +'):\n' + "Past character limit..."));
+			// Get the queue text.
+			const text = queue.map((video, index) => (
+				(index + 1) + ': ' + video.title
+			)).join('\n');
+			if (text.length > 1900) {
+				const newText = text.substr(0, 1899);
+				const otherText = text.substr(1900, text.length);
+				if (otherText.length > 1900) {
+					msg.channel.send(note('wrap', 'Queue ('+ queueStatus +'):\n' + "Past character limit..."));
+				} else {
+					if (musicbot.enableQueueStat) {
+						//Get the status of the queue.
+						let queueStatus = 'Stopped';
+						const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
+						if (voiceConnection !== null) {
+							const dispatcher = voiceConnection.player.dispatcher;
+							queueStatus = dispatcher.paused ? 'Paused' : 'Playing';
+						}
+
+						// Send the queue and status.
+						msg.channel.send(note('wrap', 'Queue ('+ queueStatus +'):\n' + newText));
+						msg.channel.send(note('wrap', 'Queue (2) ('+ queueStatus +'):\n' + otherText));
+					} else {
+						msg.channel.send(note('wrap', 'Queue:\n' + newText));
+						msg.channel.send(note('wrap', 'Queue (2):\n' + otherText));
+					}
+				};
 			} else {
 				if (musicbot.enableQueueStat) {
 					//Get the status of the queue.
@@ -741,29 +760,15 @@ module.exports = function (client, options) {
 					}
 
 					// Send the queue and status.
-					msg.channel.send(note('wrap', 'Queue ('+ queueStatus +'):\n' + newText));
-					msg.channel.send(note('wrap', 'Queue (2) ('+ queueStatus +'):\n' + otherText));
+					msg.channel.send(note('wrap', 'Queue ('+ queueStatus +'):\n' + text));
 				} else {
-					msg.channel.send(note('wrap', 'Queue:\n' + newText));
-					msg.channel.send(note('wrap', 'Queue (2):\n' + otherText));
+					msg.channel.send(note('wrap', 'Queue:\n' + text));
 				}
-			};
-		} else {
-			if (musicbot.enableQueueStat) {
-				//Get the status of the queue.
-				let queueStatus = 'Stopped';
-				const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
-				if (voiceConnection !== null) {
-					const dispatcher = voiceConnection.player.dispatcher;
-					queueStatus = dispatcher.paused ? 'Paused' : 'Playing';
-				}
-
-				// Send the queue and status.
-				msg.channel.send(note('wrap', 'Queue ('+ queueStatus +'):\n' + text));
-			} else {
-				msg.channel.send(note('wrap', 'Queue:\n' + text));
 			}
-		}
+		} catch (error) {
+			console.error(new Error(`Play command error from userID ${msg.author.id} in guildID ${msg.guild.id}\n${error.stack}`));
+			return;
+		};
 	}
 
 	/**
@@ -1003,9 +1008,17 @@ module.exports = function (client, options) {
 				});
 			}).catch((error) => {
 				console.error(error);
+				// Remove the song from the queue.
+				queue.shift();
+				// Play the next song in the queue.
+				executeQueue(msg, queue);
 			});
 		}).catch((error) => {
 			console.error(error);
+			// Remove the song from the queue.
+			queue.shift();
+			// Play the next song in the queue.
+			executeQueue(msg, queue);
 		});
 	}
 
