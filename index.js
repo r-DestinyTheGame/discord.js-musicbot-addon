@@ -393,7 +393,6 @@ module.exports = function (client, options) {
 	 * @returns {boolean} -
 	 */
 	function isMod(member) {
-		if (musicbot.ownerOverMember && member.id === musicbot.botOwner) return member.hasPermission("MANAGE_GUILD");
 		return member.hasPermission("MANAGE_GUILD");
 	}
 
@@ -404,8 +403,11 @@ module.exports = function (client, options) {
 	 * @returns {boolean} -
 	 */
 	function isDJ(member) {
-		if (member.roles.exists('name', 'DJ'));
-		return true;
+		if (member.roles.exists('name', 'DJ')) { 
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -415,8 +417,11 @@ module.exports = function (client, options) {
 	 * @returns {boolean} -
 	 */
 	function isAuthorizedChannel(msg) {
-		if (isMod(msg.member) || msg.channel.id === '365686365532454912');
-		return true;
+		if (isMod(msg.member) || msg.channel.id === '365686365532454912' || msg.channel.id === '363462844693479434') {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -568,88 +573,87 @@ module.exports = function (client, options) {
 	function play(msg, suffix) {
 		// Make sure the user is in a voice channel or is Mod/DJ
 		if (isMod(msg.member) || isDJ(msg.member) || msg.member.voiceChannel.id === musicbot.musicVoiceChannelId) {
+			if (isAuthorizedChannel(msg)) {
+				// Make sure the suffix exists.
+				if (!suffix) return msg.channel.send(note('fail', 'No video specified!'));
+
+				// Get the queue.
+				const queue = getQueue(msg.guild.id);
+
+				// Check if the queue has reached its maximum size.
+				if (queue.length >= musicbot.maxQueueSize) {
+					return msg.channel.send(note('fail', 'Maximum queue size reached!'));
+				}
+
+				// Get the video information.
+				msg.channel.send(note('note', 'Searching...')).then(response => {
+					var searchstring = suffix
+					if (searchstring.includes('?list=')) {
+						response.edit(note('note', 'Playlist detected! Fetching...')).then(response => {
+							//Get the playlist ID.
+							const playid = searchstring.toString().split('?list=')[1];
+
+							//Get info on the playlist.
+							ypi.playlistInfo(musicbot.youtubeKey, playid, function(playlistItems) {
+								const newItems = Array.from(playlistItems);
+								var skippedVideos = new Array();
+								var queuedVids = new Array();
+
+								for (var i = 0; i < newItems.length; i++) {
+									var results = newItems[i];
+									if (queue.length > musicbot.maxQueueSize) {
+										skippedVideos.push(results.title);
+									} else {
+										results.link = `https://www.youtube.com/watch?v=` + newItems[i].resourceId.videoId;
+										results.description = " ";
+										results.requester = msg.author.id;
+
+										queue.push(results);
+										queuedVids.push(results.title);
+										if (queue.length === 1) executeQueue(msg, queue);
+									};
+								};
+								function endrun() {
+									var qvids = queuedVids.toString().replace(/,/g, '\n');
+									var svids = skippedVideos.toString().replace(/,/g, '\n');
+									if (qvids.length > 1000) qvids = 'Over character count, replaced...';
+									if (svids.length > 1000) svids = 'Over character count, replaced...';
+
+									if (svids != ""){
+										msg.channel.send(note('wrap', `Queued:\n${qvids}\nSkipped: (Max Queue)\n${svids}`), {split: true});
+									} else {
+										msg.channel.send(note('wrap', `Queued:\n${qvids}`), {split: true});
+									};
+								};
+								setTimeout(endrun, 5000);
+							});
+
+						})
+					} else {
+						search(searchstring, opts, function(err, results) {
+							if (err) {
+								if (musicbot.logging) console.log(err);
+								const nerr = err.toString().split(':');
+								return response.edit(note('fail', `error occoured!\`\`\`\n${nerr[0]}: ${nerr[1]}\n\`\`\``));
+							};
+
+							// console.log(results[0]);
+							results[0].requester = msg.author.id;
+
+							response.edit(note('note', 'Queued: ' + results[0].title)).then(() => {
+								queue.push(results[0]);
+								// Play if only one element in the queue.
+								if (queue.length === 1) executeQueue(msg, queue);
+							}).catch(console.log);
+						});
+				};
+				}).catch(console.log);
+			} else {
+				return msg.member.user.send(note('fail', 'This command can only be run in the #music-discussion channel.'));
+			}
 		} else {
 			return msg.member.user.send(note('fail', 'You must be a `Mod`, `DJ`, or in the Music voice channel.'));
-		}
-
-		if (!isAuthorizedChannel(msg)) {
-			return msg.member.user.send(note('fail', 'This command can only be run in the #music-discussion channel.'));
-		}
-
-		// Make sure the suffix exists.
-		if (!suffix) return msg.channel.send(note('fail', 'No video specified!'));
-
-		// Get the queue.
-		const queue = getQueue(msg.guild.id);
-
-		// Check if the queue has reached its maximum size.
-		if (queue.length >= musicbot.maxQueueSize) {
-			return msg.channel.send(note('fail', 'Maximum queue size reached!'));
-		}
-
-		// Get the video information.
-		msg.channel.send(note('note', 'Searching...')).then(response => {
-			var searchstring = suffix
-			if (searchstring.includes('?list=')) {
-				response.edit(note('note', 'Playlist detected! Fetching...')).then(response => {
-					//Get the playlist ID.
-					const playid = searchstring.toString().split('?list=')[1];
-
-					//Get info on the playlist.
-					ypi.playlistInfo(musicbot.youtubeKey, playid, function(playlistItems) {
-						const newItems = Array.from(playlistItems);
-						var skippedVideos = new Array();
-						var queuedVids = new Array();
-
-						for (var i = 0; i < newItems.length; i++) {
-							var results = newItems[i];
-							if (queue.length > musicbot.maxQueueSize) {
-								skippedVideos.push(results.title);
-							} else {
-								results.link = `https://www.youtube.com/watch?v=` + newItems[i].resourceId.videoId;
-								results.description = " ";
-								results.requester = msg.author.id;
-
-								queue.push(results);
-								queuedVids.push(results.title);
-								if (queue.length === 1) executeQueue(msg, queue);
-							};
-						};
-						function endrun() {
-							var qvids = queuedVids.toString().replace(/,/g, '\n');
-							var svids = skippedVideos.toString().replace(/,/g, '\n');
-							if (qvids.length > 1000) qvids = 'Over character count, replaced...';
-							if (svids.length > 1000) svids = 'Over character count, replaced...';
-
-							if (svids != ""){
-								msg.channel.send(note('wrap', `Queued:\n${qvids}\nSkipped: (Max Queue)\n${svids}`), {split: true});
-							} else {
-								msg.channel.send(note('wrap', `Queued:\n${qvids}`), {split: true});
-							};
-						};
-						setTimeout(endrun, 5000);
-					});
-
-				})
-			} else {
-				search(searchstring, opts, function(err, results) {
-					if (err) {
-						if (musicbot.logging) console.log(err);
-						const nerr = err.toString().split(':');
-						return response.edit(note('fail', `error occoured!\`\`\`\n${nerr[0]}: ${nerr[1]}\n\`\`\``));
-					};
-
-					// console.log(results[0]);
-					results[0].requester = msg.author.id;
-
-					response.edit(note('note', 'Queued: ' + results[0].title)).then(() => {
-						queue.push(results[0]);
-						// Play if only one element in the queue.
-						if (queue.length === 1) executeQueue(msg, queue);
-					}).catch(console.log);
-				});
-		};
-		}).catch(console.log);
+		}			
 	}
 
 
@@ -942,9 +946,8 @@ module.exports = function (client, options) {
 			if (voiceConnection === null) {
 
 				const musicVoiceChannel = client.channels.get(musicbot.musicVoiceChannelId);
-				// voiceChannel = client.channels.get('325441753526042634');
-				// Check if the user is in a voice channel.
-				if (musicVoiceChannel) { // musicbot.musicVoiceChannelId
+				// Connect to the voice channel
+				if (musicVoiceChannel) {
 					musicVoiceChannel.join().then(connection => {
 						resolve(connection);
 					}).catch((error) => {
@@ -971,14 +974,14 @@ module.exports = function (client, options) {
 
 				connection.on('error', (error) => {
 					// Skip to the next song.
-					console.log(error);
+					console.error(error);
 					queue.shift();
 					executeQueue(msg, queue);
 				});
 
 				dispatcher.on('error', (error) => {
 					// Skip to the next song.
-					console.log(error);
+					console.error(error);
 					queue.shift();
 					executeQueue(msg, queue);
 				});
@@ -999,10 +1002,10 @@ module.exports = function (client, options) {
 					}, 1000);
 				});
 			}).catch((error) => {
-				console.log(error);
+				console.error(error);
 			});
 		}).catch((error) => {
-			console.log(error);
+			console.error(error);
 		});
 	}
 
@@ -1021,7 +1024,7 @@ module.exports = function (client, options) {
 			return ':no_entry_sign: | ' + text.replace(/`/g, '`' + String.fromCharCode(8203));
 		} else {
 			const harp = new Error(`${type} was an invalid type; note function`);
-			console.log(harp);
+			console.error(harp);
 		}
   };
 }
