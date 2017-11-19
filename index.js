@@ -326,57 +326,61 @@ module.exports = function (client, options) {
 
 	// Catch message events.
 	client.on('message', msg => {
-		const message = msg.content.trim();
+		try {
+			const message = msg.content.trim();
 
-		// Check if the message is a command.
-		if (message.toLowerCase().startsWith(musicbot.botPrefix.toLowerCase())) {
-			// Get the command, suffix and bot.
-			const command = message.substring(musicbot.botPrefix.length).split(/[ \n]/)[0].toLowerCase().trim();
-			const suffix = message.substring(musicbot.botPrefix.length + command.length).trim();
+			// Check if the message is a command.
+			if (message.toLowerCase().startsWith(musicbot.botPrefix.toLowerCase())) {
+				// Get the command, suffix and bot.
+				const command = message.substring(musicbot.botPrefix.length).split(/[ \n]/)[0].toLowerCase().trim();
+				const suffix = message.substring(musicbot.botPrefix.length + command.length).trim();
 
-			// Process the commands.
-			switch (command) {
-				case musicbot.helpCmd:
-					if (musicbot.disableHelp) return;
-					return musicbothelp(msg, suffix);
-				case musicbot.playCmd:
-					if (musicbot.disablePlay) return;
-					return play(msg, suffix);
-				case musicbot.skipCmd:
-					if (musicbot.disableSkip) return;
-					return skip(msg, suffix);
-				case musicbot.queueCmd:
-					if (musicbot.disableQueue) return;
-					return listQueue(msg, suffix);
-				case musicbot.pauseCmd:
-					if (musicbot.disablePause) return;
-					return pause(msg, suffix);
-				case musicbot.resumeCmd:
-					if (musicbot.disableResume) return;
-					return resume(msg, suffix);
-				case musicbot.volumeCmd:
-					if (musicbot.disableVolume) return;
-					return volume(msg, suffix);
-				case musicbot.leaveCmd:
-					if (musicbot.disableLeave) return;
-					return leave(msg, suffix);
-				case musicbot.clearCmd:
-					if (musicbot.disableClear) return;
-					return clearqueue(msg, suffix);
-				case musicbot.loopCmd:
-					if (musicbot.disableLoop) return;
-					return loop(msg, suffix);
+				// Process the commands.
+				switch (command) {
+					case musicbot.helpCmd:
+						if (musicbot.disableHelp) return;
+						return musicbothelp(msg, suffix);
+					case musicbot.playCmd:
+						if (musicbot.disablePlay) return;
+						return play(msg, suffix);
+					case musicbot.skipCmd:
+						if (musicbot.disableSkip) return;
+						return skip(msg, suffix);
+					case musicbot.queueCmd:
+						if (musicbot.disableQueue) return;
+						return listQueue(msg, suffix);
+					case musicbot.pauseCmd:
+						if (musicbot.disablePause) return;
+						return pause(msg, suffix);
+					case musicbot.resumeCmd:
+						if (musicbot.disableResume) return;
+						return resume(msg, suffix);
+					case musicbot.volumeCmd:
+						if (musicbot.disableVolume) return;
+						return volume(msg, suffix);
+					case musicbot.leaveCmd:
+						if (musicbot.disableLeave) return;
+						return leave(msg, suffix);
+					case musicbot.clearCmd:
+						if (musicbot.disableClear) return;
+						return clearqueue(msg, suffix);
+					case musicbot.loopCmd:
+						if (musicbot.disableLoop) return;
+						return loop(msg, suffix);
+				}
+				if (musicbot.clearInvoker) {
+					msg.delete();
+				}
 			}
-			if (musicbot.clearInvoker) {
-				msg.delete();
-			}
-		}
+		} catch (error) {
+			console.error(`There was a general error in the bot. Error: ${error}`);
+		};
 	});
 
 	/**
 	 * Live message function.
 	 */
-	 if (musicbot.enableAliveMessage) {
+	if (musicbot.enableAliveMessage) {
 		 setInterval(function liveMessage() {
 			 if (musicbot.aliveMessage.length < 2) {
 				 musicbot.aliveMessage = "----------------------------------\n"+client.user.username+" online since "+client.readyAt+"!"+"\n----------------------------------";
@@ -384,7 +388,7 @@ module.exports = function (client, options) {
 
 			 console.log(musicbot.aliveMessage);
 		 }, musicbot.aliveMessageTime);
-	 };
+	};
 
 	/**
 	 * Checks if a user is a mod.
