@@ -4,6 +4,8 @@
 This module may be buggy and need some fine tuning. Feel free to let me know what problems you encounter by opening an issue on the repo.
 This was originally an update of the original bot from [ruiqimao](https://github.com/ruiqimao/discord.js-music) by [nexu-dev](https://www.npmjs.com/package/discord.js-music-v11), but is now a updated version for [Discord.js](https://discord.js.org/)'s version 11.2^. Fixes deprecated warnings, video playback issues, along with various other add-ons and tweaks to the priors.  
 
+It was then modified from [TheDemise](https://github.com/TheDemise/discord.js-musicbot-addon) to work for r/DestinyTheGame's [Sweeper Bot](https://github.com/r-DestinyTheGame/Sweeper-Bot/) with heavy tuning for specific permissions.
+
 _Note: the 1.3.x+ update(S) requires a code change from 1.2.0, see the examples/notes below._  
 
 __The commands available are: (default names)__  

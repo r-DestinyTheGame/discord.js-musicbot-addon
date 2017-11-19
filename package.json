@@ -1,6 +1,6 @@
 {
   "name": "discord.js-musicbot-addon",
-  "version": "1.6.3",
+  "version": "1.7.0",
   "description": "A music bot addon for an already made Discord.js bot to run with or simply run by itself.",
   "main": "index.js",
   "scripts": {
@@ -13,12 +13,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/TheDemise/discord.js-musicbot-addon"
+    "url": "https://github.com/r-DestinyTheGame/discord.js-musicbot-addon"
   },
   "bugs": {
-    "url": "https://github.com/TheDemise/discord.js-musicbot-addon/issues"
+    "url": "https://github.com/r-DestinyTheGame/discord.js-musicbot-addon/issues"
   },
-  "homepage": "https://github.com/TheDemise/discord.js-musicbot-addon",
+  "homepage": "https://github.com/r-DestinyTheGame/discord.js-musicbot-addon",
   "keywords": [
     "discord",
     "discord.js",
@@ -26,6 +26,6 @@
     "bot",
     "addon"
   ],
-  "author": "demisex",
+  "author": "D0cR3d",
   "license": "ISC"
 }
