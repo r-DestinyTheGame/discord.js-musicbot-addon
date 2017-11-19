@@ -1,6 +1,7 @@
 /**
  * Original code nexu-dev, https://github.com/nexu-dev/discord.js-client
  * Tweeked by Demise.
+ * Tweeked by D0cR3d.
  */
 
 // const YoutubeDL = require('youtube-dl');
@@ -47,6 +48,7 @@ module.exports = function (client, options) {
 	class Music {
 		constructor(client, options) {
 			this.youtubeKey = (options && options.youtubeKey);
+			this.musicVoiceChannelId = (options && options.musicVoiceChannelId);
 			this.botPrefix = (options && options.prefix) || '!';
 			this.global = (options && options.global) || false;
 			this.maxQueueSize = parseInt((options && options.maxQueueSize) || 20);
@@ -192,12 +194,6 @@ module.exports = function (client, options) {
 		//CLEAR_INVOKER errors.
 		if (typeof musicbot.clearInvoker !== 'boolean') {
 			console.log(new TypeError(`clearInvoker must be a boolean`));
-			process.exit(1);
-		};
-
-		//disabledCmds errors.
-		if (typeof musicbot.disabledCmds !== 'arry') {
-			console.log(new TypeError(`disabledCmds must be an array`));
 			process.exit(1);
 		};
 
@@ -391,14 +387,25 @@ module.exports = function (client, options) {
 	 };
 
 	/**
-	 * Checks if a user is an admin.
+	 * Checks if a user is a mod.
 	 *
 	 * @param {GuildMember} member - The guild member
 	 * @returns {boolean} -
 	 */
-	function isAdmin(member) {
-		if (musicbot.ownerOverMember && member.id === musicbot.botOwner) return member.hasPermission("ADMINISTRATOR");
-		return member.hasPermission("ADMINISTRATOR");
+	function isMod(member) {
+		if (musicbot.ownerOverMember && member.id === musicbot.botOwner) return member.hasPermission("MANAGE_GUILD");
+		return member.hasPermission("MANAGE_GUILD");
+	}
+
+	/**
+	 * Checks if a user is a DJ.
+	 *
+	 * @param {GuildMember} member - The guild member
+	 * @returns {boolean} -
+	 */
+	function isDJ(member) {
+		if (member.roles.exists('name', 'DJ'));
+		return true;
 	}
 
 	/**
@@ -412,7 +419,8 @@ module.exports = function (client, options) {
 		if (musicbot.ownerOverMember && member.id === musicbot.botOwner) return true;
 		if (musicbot.anyoneCanSkip) return true;
 		else if (queue[0].requester === member.id) return true;
-		else if (isAdmin(member)) return true;
+		else if (isMod(member)) return true;
+		else if (isDJ(member)) return true;
 		else return false;
 	}
 
@@ -425,8 +433,8 @@ module.exports = function (client, options) {
 	 */
 	function canAdjust(member, queue) {
 		if (musicbot.anyoneCanAdjust) return true;
-		else if (queue[0].requester === member.id) return true;
-		else if (isAdmin(member)) return true;
+		else if (isMod(member)) return true;
+		else if (isDJ(member)) return true;
 		else return false;
 	}
 
@@ -452,8 +460,8 @@ module.exports = function (client, options) {
 	 * @param {string} suffix - Command suffix.
 	 * @returns {<promise>} - The response edit.
 	 */
-	 function musicbothelp(msg, suffix) {
-		 if (!suffix || suffix.includes('help')) {
+	function musicbothelp(msg, suffix) {
+		if (!suffix || suffix.includes('help')) {
 			 const embed = new Discord.RichEmbed();
 			 embed.setAuthor("Commands", msg.author.displayAvatarURL)
 			 embed.setDescription(`Commands with a * require Admin perms. Use \`${musicbot.botPrefix}${musicbot.helpCmd} command\` for help on usage.`)
@@ -467,75 +475,76 @@ module.exports = function (client, options) {
 			 if (!musicbot.disableLeave) embed.addField(musicbot.leaveCmd, `Leave and clear the queue`)
 			 if (!musicbot.disableClear) embed.addField(musicbot.clearCmd, `Clears the current queue.`)
 			 embed.setColor(0x27e33d)
-			 msg.channel.send({embed});
-		 } else {
-		 	if (suffix.includes(musicbot.playCmd)) {
-				if (musicbot.disablePlay) return msg.channel.send(note('fail', `${suffix} is not a valid command!`));
+			 msg.member.user.send({embed});
+		} else {
+			if (suffix.includes(musicbot.playCmd)) {
+				if (musicbot.disablePlay) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 				const embed = new Discord.RichEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.playCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Addes a song to the queue.\n**__Usage:__** ${musicbot.botPrefix}${musicbot.playCmd} Video URL | Playlist URL | search for something.`);
 				embed.setColor(0x27e33d);
-				msg.channel.send({embed});
+				msg.member.user.send({embed});
 			} else if (suffix.includes(musicbot.skipCmd)) {
-				if (musicbot.disableSkip) return msg.channel.send(note('fail', `${suffix} is not a valid command!`));
+				if (musicbot.disableSkip) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 				const embed = new Discord.RichEmbed();
 	 			embed.setAuthor(`${musicbot.botPrefix}${musicbot.skipCmd}`, client.user.displayAvatarURL);
 	 			embed.setDescription(`Skips the playing song or multi songs. You must be the person that queued the song to skip it, or admin.\n**__Usage:__** ${musicbot.botPrefix}${musicbot.skipCmd} [numer of songs]`);
 				embed.setColor(0x27e33d);
-	 			msg.channel.send({embed});
-		 } else if (suffix.includes(musicbot.queueCmd)) {
-				if (musicbot.disableQueue) return msg.channel.send(note('fail', `${suffix} is not a valid command!`));
+	 			msg.member.user.send({embed});
+		} else if (suffix.includes(musicbot.queueCmd)) {
+				if (musicbot.disableQueue) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 				const embed = new Discord.RichEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.queueCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Displays the current queue.`);
 				embed.setColor(0x27e33d);
-				msg.channel.send({embed});
+				msg.member.user.send({embed});
 		} else if (suffix.includes(musicbot.pauseCmd)) {
-				if (musicbot.disablePause) return msg.channel.send(note('fail', `${suffix} is not a valid command!`));
+				if (musicbot.disablePause) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 				const embed = new Discord.RichEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.pauseCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Pauses the current queue.`);
 				embed.setColor(0x27e33d);
-				msg.channel.send({embed});
+				msg.member.user.send({embed});
 		} else if (suffix.includes(musicbot.resumeCmd)) {
-				if (musicbot.disableResume) return msg.channel.send(note('fail', `${suffix} is not a valid command!`));
+				if (musicbot.disableResume) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 				const embed = new Discord.RichEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.resumeCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Resumes the current queue if paused.`);
 				embed.setColor(0x27e33d);
-				msg.channel.send({embed});
+				msg.member.user.send({embed});
 		} else if (suffix.includes(musicbot.volumeCmd)) {
-				if (musicbot.disableVolume) return msg.channel.send(note('fail', `${suffix} is not a valid command!`));
+				if (musicbot.disableVolume) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 				const embed = new Discord.RichEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.volumeCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Adjusts the streams volume. Must be admin.\n**__Usage:__** ${musicbot.botPrefix}${musicbot.volumeCmd} <1 to 200>`);
 				embed.setColor(0x27e33d);
-				msg.channel.send({embed});
+				msg.member.user.send({embed});
 		} else if (suffix.includes(musicbot.leaveCmd)) {
-				if (musicbot.disableLeave) return msg.channel.send(note('fail', `${suffix} is not a valid command!`));
+				if (musicbot.disableLeave) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 				const embed = new Discord.RichEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.leaveCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Leaves the voice channel and clears the queue.`);
 				embed.setColor(0x27e33d);
-				msg.channel.send({embed});
+				msg.member.user.send({embed});
 		} else if (suffix.includes(musicbot.clearCmd)) {
-				if (musicbot.disableClear) return msg.channel.send(note('fail', `${suffix} is not a valid command!`));
+				if (musicbot.disableClear) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 				const embed = new Discord.RichEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.clearCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Clears the current queue playing.`);
 				embed.setColor(0x27e33d);
-				msg.channel.send({embed});
+				msg.member.user.send({embed});
 		} else if (suffix.includes(musicbot.loopCmd)) {
-				if (musicbot.disableLoop) return msg.channel.send(note('fail', `${suffix} is not a valid command!`));
+				if (musicbot.disableLoop) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 				const embed = new Discord.RichEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.loopCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Enables/disables looping of the currently being played song.`);
 				embed.setColor(0x27e33d);
-				msg.channel.send({embed});
+				msg.member.user.send({embed});
 		} else {
-			msg.channel.send(note('fail', `${suffix} is not a valid command!`));
+			msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 		};
 	};
+
 };
 
 	/**
@@ -546,8 +555,11 @@ module.exports = function (client, options) {
 	 * @returns {<promise>} - The response edit.
 	 */
 	function play(msg, suffix) {
-		// Make sure the user is in a voice channel.
-		if (msg.member.voiceChannel === undefined) return msg.channel.send(note('fail', 'You\'re not in a voice channel~'));
+		// Make sure the user is in a voice channel or is Mod/DJ
+		if (isMod(msg.member) || isDJ(msg.member) || msg.member.voiceChannel.id === musicbot.musicVoiceChannelId) {
+		} else {
+			return msg.member.user.send(note('fail', 'You must be a `Mod`, `DJ`, or in the Music voice channel.'));
+		}
 
 		// Make sure the suffix exists.
 		if (!suffix) return msg.channel.send(note('fail', 'No video specified!'));
@@ -604,8 +616,8 @@ module.exports = function (client, options) {
 					});
 
 				})
-		  } else {
-		    search(searchstring, opts, function(err, results) {
+			} else {
+				search(searchstring, opts, function(err, results) {
 					if (err) {
 						if (musicbot.logging) console.log(err);
 						const nerr = err.toString().split(':');
@@ -620,8 +632,8 @@ module.exports = function (client, options) {
 						// Play if only one element in the queue.
 						if (queue.length === 1) executeQueue(msg, queue);
 					}).catch(console.log);
-		    });
-		  };
+				});
+		};
 		}).catch(console.log);
 	}
 
@@ -633,7 +645,7 @@ module.exports = function (client, options) {
 	 * @param {string} suffix - Command suffix.
 	 * @returns {<promise>} - The response message.
 	 */
-	 function skip(msg, suffix) {
+	function skip(msg, suffix) {
 		// Get the voice connection.
 		const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
 		if (voiceConnection === null) return msg.channel.send(note('fail', 'No music being played.'));
@@ -641,8 +653,8 @@ module.exports = function (client, options) {
 		// Get the queue.
 		const queue = getQueue(msg.guild.id);
 
-		if (!canSkip(msg.member, queue)) return msg.channel.send(note('fail', 'You cannot skip this as you didn\'t queue it.')).then((response) => {
-			response.delete(5000);
+		if (!canSkip(msg.member, queue)) return msg.member.user.send(note('fail', 'You cannot skip this. You must be a `Mod`, `DJ`, or be the one who requested it.')).then((response) => {
+			response.delete(7000);
 		});
 
 		// Get the number to skip.
@@ -666,7 +678,7 @@ module.exports = function (client, options) {
 			dispatcher.end();
 		} catch (e) {
 			if (musicbot.logging) console.log(new Error(`Play command error from userID ${msg.author.id} in guildID ${msg.guild.id}\n${e.stack}`));
-			return msg.channel.send(note('fail', 'An error occoured, sorry!'));
+			return msg.member.user.send(note('fail', 'An error occoured, sorry!'));
 		};
 
 		msg.channel.send(note('note', 'Skipped ' + toSkip + '!'));
@@ -739,13 +751,14 @@ module.exports = function (client, options) {
 		const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
 		if (voiceConnection === null) return msg.channel.send(note('fail', 'No music being played.'));
 
-		if (!isAdmin(msg.member))
-			return msg.channel.send(note('fail', 'You are not authorized to use this.'));
-
-		// Pause.
-		msg.channel.send(note('note', 'Playback paused.'));
-		const dispatcher = voiceConnection.player.dispatcher;
-		if (!dispatcher.paused) dispatcher.pause();
+		if (isMod(msg.member) || isDJ(msg.member)) {
+			// Pause.
+			msg.channel.send(note('note', 'Playback paused.'));
+			const dispatcher = voiceConnection.player.dispatcher;
+			if (!dispatcher.paused) dispatcher.pause();
+		} else {
+			return msg.member.user.send(note('fail', 'You are not authorized to use this. You must be a Mod or have the DJ role.'));
+		}
 	}
 
 	/**
@@ -756,7 +769,7 @@ module.exports = function (client, options) {
 	 * @returns {<promise>} - The response message.
 	 */
 	function leave(msg, suffix) {
-		if (isAdmin(msg.member)) {
+		if (isMod(msg.member)) {
 			const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
 			if (voiceConnection === null) return msg.channel.send(note('fail', 'I\'m not in any channel!.'));
 			// Clear the queue.
@@ -766,9 +779,9 @@ module.exports = function (client, options) {
 			// End the stream and disconnect.
 			voiceConnection.player.dispatcher.end();
 			voiceConnection.disconnect();
-			msg.channel.send(note('note', 'Left voice channel.'));
+			// msg.channel.send(note('note', 'Left voice channel.'));
 		} else {
-			msg.channel.send(note('fail', 'You don\'t have permission to use that command!'));
+			msg.member.user.send(note('fail', 'You don\'t have permission to use that command!'));
 		}
 	}
 
@@ -779,18 +792,18 @@ module.exports = function (client, options) {
 	 * @param {string} suffix - Command suffix.
 	 */
 	function clearqueue(msg, suffix) {
-		if (isAdmin(msg.member)) {
+		if (isMod(msg.member) || isDJ(msg.member)) {
 			const queue = getQueue(msg.guild.id);
 			const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
 			if (voiceConnection === null) return msg.channel.send(note('fail', 'I\'m not in any channel!.'));
 
 			queue.splice(0, queue.length);
-			msg.channel.send(note('note', 'Queue cleared~'));
+			msg.channel.send(note('note', 'Queue cleared.'));
 
 			voiceConnection.player.dispatcher.end();
 			voiceConnection.disconnect();
 		} else {
-			msg.channel.send(note('fail', `You don't have permission to use that command, only admins may!`));
+			msg.member.user.send(note('fail', `You don't have permission to use that command, only admins may!`));
 		}
 	}
 
@@ -806,13 +819,14 @@ module.exports = function (client, options) {
 		const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
 		if (voiceConnection === null) return msg.channel.send(note('fail', 'No music being played.'));
 
-		if (!isAdmin(msg.member))
-			return msg.channel.send(note('fail', 'You are not authorized to use this.'));
-
-		// Resume.
-		msg.channel.send(note('note', 'Playback resumed.'));
-		const dispatcher = voiceConnection.player.dispatcher;
-		if (dispatcher.paused) dispatcher.resume();
+		if (isMod(msg.member) || isDJ(msg.member)) {
+			// Resume.
+			msg.channel.send(note('note', 'Playback resumed.'));
+			const dispatcher = voiceConnection.player.dispatcher;
+			if (dispatcher.paused) dispatcher.resume();
+		} else {
+			msg.member.user.send(note('fail', 'You don\'t have permission to use that command!'));
+		}
 	}
 
 	/**
@@ -831,17 +845,18 @@ module.exports = function (client, options) {
 		const queue = getQueue(msg.guild.id);
 
 		if (!canAdjust(msg.member, queue))
-			return msg.channel.send(note('fail', 'You are not authorized to use this. Only admins are.'));
+			return msg.member.user.send(note('fail', 'You are not authorized to use this. Only the Mods or DJs can.'));
 
 		// Get the dispatcher
 		const dispatcher = voiceConnection.player.dispatcher;
 
-		if (suffix > 200 || suffix < 0) return msg.channel.send(note('fail', 'Volume out of range!')).then((response) => {
+		if (suffix > 200 || suffix < 0) return msg.channel.send(note('fail', 'Volume out of range! Must be between 1 and 200.')).then((response) => {
 			response.delete(5000);
 		});
 
 		msg.channel.send(note('note', 'Volume set to ' + suffix));
 		dispatcher.setVolume((suffix/100));
+		musicbot.defVolume = parseInt(suffix);
 	}
 
 	/**
@@ -882,9 +897,12 @@ module.exports = function (client, options) {
 			// Join the voice channel if not already in one.
 			const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
 			if (voiceConnection === null) {
+
+				const musicVoiceChannel = client.channels.get(musicbot.musicVoiceChannelId);
+				// voiceChannel = client.channels.get('325441753526042634');
 				// Check if the user is in a voice channel.
-				if (msg.member.voiceChannel) {
-					msg.member.voiceChannel.join().then(connection => {
+				if (musicVoiceChannel) { // musicbot.musicVoiceChannelId
+					musicVoiceChannel.join().then(connection => {
 						resolve(connection);
 					}).catch((error) => {
 						console.log(error);
@@ -946,7 +964,7 @@ module.exports = function (client, options) {
 	}
 
 	//Text wrapping and cleaning.
-	 function note(type, text) {
+	function note(type, text) {
 		if (type === 'wrap') {
 			ntext = text
 			.replace(/`/g, '`' + String.fromCharCode(8203))
