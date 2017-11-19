@@ -409,6 +409,17 @@ module.exports = function (client, options) {
 	}
 
 	/**
+	 * Checks if a message in authorized channel.
+	 *
+	 * @param {Message} Message - Message sent
+	 * @returns {boolean} -
+	 */
+	function isAuthorizedChannel(msg) {
+		if (isMod(msg.member) || msg.channel.id === '365686365532454912');
+		return true;
+	}
+
+	/**
 	 * Checks if the user can skip the song.
 	 *
 	 * @param {GuildMember} member - The guild member
@@ -561,6 +572,10 @@ module.exports = function (client, options) {
 			return msg.member.user.send(note('fail', 'You must be a `Mod`, `DJ`, or in the Music voice channel.'));
 		}
 
+		if (!isAuthorizedChannel(msg)) {
+			return msg.member.user.send(note('fail', 'This command can only be run in the #music-discussion channel.'));
+		}
+
 		// Make sure the suffix exists.
 		if (!suffix) return msg.channel.send(note('fail', 'No video specified!'));
 
@@ -657,6 +672,10 @@ module.exports = function (client, options) {
 			response.delete(7000);
 		});
 
+		if (!isAuthorizedChannel(msg)) {
+			return msg.member.user.send(note('fail', 'This command can only be run in the #music-discussion channel.'));
+		}
+
 		// Get the number to skip.
 		let toSkip = 1; // Default 1.
 		if (!isNaN(suffix) && parseInt(suffix) > 0) {
@@ -691,6 +710,10 @@ module.exports = function (client, options) {
 	 * @param {string} suffix - Command suffix.
 	 */
 	function queue(msg, suffix) {
+		if (!isAuthorizedChannel(msg)) {
+			return msg.member.user.send(note('fail', 'This command can only be run in the #music-discussion channel.'));
+		}
+
 		// Get the queue.
 		const queue = getQueue(msg.guild.id);
 
@@ -747,6 +770,10 @@ module.exports = function (client, options) {
 	 * @returns {<promise>} - The response message.
 	 */
 	function pause(msg, suffix) {
+		if (!isAuthorizedChannel(msg)) {
+			return msg.member.user.send(note('fail', 'This command can only be run in the #music-discussion channel.'));
+		}
+
 		// Get the voice connection.
 		const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
 		if (voiceConnection === null) return msg.channel.send(note('fail', 'No music being played.'));
@@ -769,6 +796,10 @@ module.exports = function (client, options) {
 	 * @returns {<promise>} - The response message.
 	 */
 	function leave(msg, suffix) {
+		if (!isAuthorizedChannel(msg)) {
+			return msg.member.user.send(note('fail', 'This command can only be run in the #music-discussion channel.'));
+		}
+
 		if (isMod(msg.member)) {
 			const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
 			if (voiceConnection === null) return msg.channel.send(note('fail', 'I\'m not in any channel!.'));
@@ -792,6 +823,10 @@ module.exports = function (client, options) {
 	 * @param {string} suffix - Command suffix.
 	 */
 	function clearqueue(msg, suffix) {
+		if (!isAuthorizedChannel(msg)) {
+			return msg.member.user.send(note('fail', 'This command can only be run in the #music-discussion channel.'));
+		}
+
 		if (isMod(msg.member) || isDJ(msg.member)) {
 			const queue = getQueue(msg.guild.id);
 			const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
@@ -815,6 +850,10 @@ module.exports = function (client, options) {
 	 * @returns {<promise>} - The response message.
 	 */
 	function resume(msg, suffix) {
+		if (!isAuthorizedChannel(msg)) {
+			return msg.member.user.send(note('fail', 'This command can only be run in the #music-discussion channel.'));
+		}
+
 		// Get the voice connection.
 		const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
 		if (voiceConnection === null) return msg.channel.send(note('fail', 'No music being played.'));
@@ -837,6 +876,10 @@ module.exports = function (client, options) {
 	 * @returns {<promise>} - The response message.
 	 */
 	function volume(msg, suffix) {
+		if (!isAuthorizedChannel(msg)) {
+			return msg.member.user.send(note('fail', 'This command can only be run in the #music-discussion channel.'));
+		}
+
 		// Get the voice connection.
 		const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
 		if (voiceConnection === null) return msg.channel.send(note('fail', 'No music being played.'));
