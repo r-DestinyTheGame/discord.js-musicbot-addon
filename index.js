@@ -836,11 +836,8 @@ module.exports = function (client, options) {
 			const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
 			if (voiceConnection === null) return msg.channel.send(note('fail', 'I\'m not in any channel!.'));
 
-			queue.splice(0, queue.length);
+			queue.splice(1, queue.length);
 			msg.channel.send(note('note', 'Queue cleared.'));
-
-			voiceConnection.player.dispatcher.end();
-			voiceConnection.disconnect();
 		} else {
 			msg.member.user.send(note('fail', `You don't have permission to use that command, only admins may!`));
 		}
@@ -897,7 +894,7 @@ module.exports = function (client, options) {
 		// Get the dispatcher
 		const dispatcher = voiceConnection.player.dispatcher;
 
-		if (suffix > 200 || suffix < 0) return msg.channel.send(note('fail', 'Volume out of range! Must be between 1 and 200.')).then((response) => {
+		if (suffix > 100 || suffix < 0) return msg.channel.send(note('fail', 'Volume out of range! Must be between 1 and 100.')).then((response) => {
 			response.delete(5000);
 		});
 
