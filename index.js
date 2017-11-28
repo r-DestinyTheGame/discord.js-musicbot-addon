@@ -4,10 +4,8 @@
  * Tweeked by D0cR3d.
  */
 
-// const YoutubeDL = require('youtube-dl');
-// const ytdl = require('ytdl-core');
+const ytdl = require('ytdl-core');
 
-const stream = require('youtube-audio-stream');
 const search = require('youtube-search');
 const playlistInfo = require('youtube-playlist-info');
 // const {Client} = require('discord.js');
@@ -52,267 +50,58 @@ module.exports = function (client, options) {
 			this.botPrefix = (options && options.prefix) || '!';
 			this.global = (options && options.global) || false;
 			this.maxQueueSize = parseInt((options && options.maxQueueSize) || 20);
-			this.defVolume = parseInt((options && options.volume) || 50);
+			
 			this.anyoneCanSkip = (options && options.anyoneCanSkip) || false;
 			this.clearInvoker = (options && options.clearInvoker) || false;
+
 			this.helpCmd = (options && options.helpCmd) || 'musichelp';
 			this.disableHelp = (options && options.disableHelp) || false;
+
 			this.playCmd = (options && options.playCmd) || 'play';
 			this.disablePlay = (options && options.disablePlay) || false;
+
 			this.skipCmd = (options && options.skipCmd) || 'skip';
 			this.disableSkip = (options && options.disableSkip) || false;
+
+			this.deleteCmd = (options && options.deleteCmd) || 'delete';
+			this.disableDelete = (options && options.disableDelete) || false;
+
+			this.nowPlayingCmd = (options && options.nowPlayingCmd) || 'nowplaying';
+			this.disableNowPlaying = (options && options.disableNowPlaying) || false;
+
 			this.queueCmd = (options && options.queueCmd) || 'queue';
 			this.disableQueue = (options && options.disableQueue) || false;
+
 			this.pauseCmd = (options && options.pauseCmd) || 'pause';
 			this.disablePause = (options && options.disablePause) || false;
+
 			this.resumeCmd = (options && options.resumeCmd) || 'resume';
 			this.disableResume = (options && options.disableResume) || false;
+
+			this.defVolume = parseInt((options && options.volume) || 25);
 			this.volumeCmd = (options && options.volumeCmd) || 'volume';
 			this.disableVolume = (options && options.disableVolume) || false;
+
 			this.leaveCmd = (options && options.leaveCmd) || 'leave';
 			this.disableLeave = (options && options.disableLeave) || false;
+
 			this.clearCmd = (options && options.clearCmd) || 'clearqueue';
 			this.disableClear = (options && options.disableClear) || false;
+
 			this.loopCmd = (options && options.loopCmd) || 'loop';
 			this.disableLoop = (options && options.disableLoop) || false;
+
 			this.enableQueueStat = (options && options.enableQueueStat) || true;
 			this.anyoneCanAdjust = (options && options.anyoneCanAdjust) || false;
 			this.ownerOverMember = (options && options.ownerOverMember) || false;
 			this.botOwner = (options && options.botOwner) || null;
 			this.logging = (options && options.logging) || false;
-			this.enableAliveMessage = (options && options.enableAliveMessage) || false;
-			this.aliveMessage = (options && options.aliveMessage) || "";
-			this.aliveMessageTime = (options && options.aliveMessageTime) || 600000;
 			this.loop = "false";
 		}
 	}
 
 	var musicbot = new Music(client, options);
 
-	//Init errors.
-	function checkErrors() {
-		if (process.version.slice(1).split('.')[0] < 8) console.log(new Error('Node 8.0.0 or higher was not found, 8+ is recommended. You may still use your version however.'));
-		if (!musicbot.youtubeKey) {
-			console.log(new Error(`youtubeKey is required but missing`));
-			process.exit(1);
-		};
-		if (musicbot.youtubeKey && typeof musicbot.youtubeKey !== 'string') {
-			console.log(new TypeError(`youtubeKey must be a string`));
-			process.exit(1);
-		};
-
-		//Disable commands erros.
-		if (typeof musicbot.disableHelp !== 'boolean') {
-			console.log(new TypeError(`disableHelp must be a boolean`));
-			process.exit(1);
-		}
-		if (typeof musicbot.disablePlay !== 'boolean') {
-			console.log(new TypeError(`disablePlay must be a boolean`));
-			process.exit(1);
-		}
-		if (typeof musicbot.disableSkip !== 'boolean') {
-			console.log(new TypeError(`disableSkip must be a boolean`));
-			process.exit(1);
-		}
-		if (typeof musicbot.disableQueue !== 'boolean') {
-			console.log(new TypeError(`disableQueue must be a boolean`));
-			process.exit(1);
-		}
-		if (typeof musicbot.disablePause !== 'boolean') {
-			console.log(new TypeError(`disablePause must be a boolean`));
-			process.exit(1);
-		}
-		if (typeof musicbot.disableResume !== 'boolean') {
-			console.log(new TypeError(`disableResume must be a boolean`));
-			process.exit(1);
-		}
-		if (typeof musicbot.disableLeave !== 'boolean') {
-			console.log(new TypeError(`disableLeave must be a boolean`));
-			process.exit(1);
-		}
-		if (typeof musicbot.disableClear !== 'boolean') {
-			console.log(new TypeError(`disableClear must be a boolean`));
-			process.exit(1);
-		}
-		if (typeof musicbot.disableLoop !== 'boolean') {
-			console.log(new TypeError(`disableLoop must be a boolean`));
-			process.exit(1);
-		}
-
-		//Owner errors.
-		if (typeof musicbot.ownerOverMember !== 'boolean') {
-			console.log(new TypeError(`ownerOverMember must be a boolean`));
-			process.exit(1);
-		};
-		if (musicbot.ownerOverMember && typeof musicbot.botOwner !== 'string') {
-			console.log(new TypeError(`botOwner must be a string`));
-			process.exit(1);
-		};
-
-		//musicbot.botPrefix errors.
-		if (typeof musicbot.botPrefix !== 'string') {
-			console.log(new TypeError(`prefix must be a string`));
-			process.exit(1);
-		};
-		if (musicbot.botPrefix.length < 1 || musicbot.botPrefix.length > 10) {
-			console.log(new RangeError(`prefix length must be between 1 and 10`));
-			process.exit(1);
-		};
-
-		//musicbot.global errors.
-		if (typeof musicbot.global !== 'boolean') {
-			console.log(new TypeError(`global must be a boolean`));
-			process.exit(1);
-		};
-
-		//musicbot.maxQueueSize errors.
-		if (typeof musicbot.maxQueueSize !== 'number') {
-			console.log(new TypeError(`maxQueueSize must be a number`));
-			process.exit(1);
-		};
-		if (!Number.isInteger(musicbot.maxQueueSize) || musicbot.maxQueueSize < 1) {
-			console.log(new TypeError(`maxQueueSize must be an integer more than 0`));
-			process.exit(1);
-		};
-
-		//DEFAULT_VOLUME errors.
-		if (typeof musicbot.defVolume !== 'number') {
-			console.log(new TypeError(`defaultVolume must be a number`));
-			process.exit(1);
-		};
-		if (!Number.isInteger(musicbot.defVolume) || musicbot.defVolume < 1 || musicbot.defVolume > 200) {
-			console.log(new TypeError(`defaultVolume must be an integer between 1 and 200`));
-			process.exit(1);
-		};
-
-		//musicbot.anyoneCanSkip errors.
-		if (typeof musicbot.anyoneCanSkip !== 'boolean') {
-			console.log(new TypeError(`anyoneCanSkip must be a boolean`));
-			process.exit(1);
-		};
-
-		//CLEAR_INVOKER errors.
-		if (typeof musicbot.clearInvoker !== 'boolean') {
-			console.log(new TypeError(`clearInvoker must be a boolean`));
-			process.exit(1);
-		};
-
-		//aliveMessage erros.
-		if (typeof musicbot.enableAliveMessage !== 'boolean') {
-			console.log(new TypeError(`enableAliveMessage must be a boolean`));
-			process.exit(1);
-		}
-		if (typeof musicbot.aliveMessage !== 'string') {
-			console.log(new TypeError(`aliveMessage must be a string`));
-			process.exit(1);
-		}
-		if (typeof musicbot.aliveMessageTime !== 'number') {
-			console.log(new TypeError(`aliveMessageTime must be a number`));
-			process.exit(1);
-		}
-
-		//Command name errors.
-		if (typeof musicbot.helpCmd !== 'string') {
-			console.log(new TypeError(`helpCmd must be a string`));
-			process.exit(1);
-		};
-		// if (typeof musicbot.enableHelp !== 'boolean') {
-		// 	console.log(new TypeError(`enableHelp must be a boolean`));
-		// 	process.exit(1);
-		// };
-		if (typeof musicbot.playCmd !== 'string') {
-			console.log(new TypeError(`playCmd must be a string`));
-			process.exit(1);
-		};
-		// if (typeof musicbot.enablePlay !== 'boolean') {
-		// 	console.log(new TypeError(`enablePlay must be a boolean`));
-		// 	process.exit(1);
-		// };
-		if (typeof musicbot.skipCmd !== 'string') {
-			console.log(new TypeError(`skipCmd must be a string`));
-			process.exit(1);
-		};
-		// if (typeof musicbot.enableSkip !== 'boolean') {
-		// 	console.log(new TypeError(`enableSkip must be a boolean`));
-		// 	process.exit(1);
-		// };
-		if (typeof musicbot.queueCmd !== 'string') {
-			console.log(new TypeError(`queueCmd must be a string`));
-			process.exit(1);
-		};
-		// if (typeof musicbot.enableQueue !== 'boolean') {
-		// 	console.log(new TypeError(`enableQueue must be a boolean`));
-		// 	process.exit(1);
-		// };
-		if (typeof musicbot.pauseCmd !== 'string') {
-			console.log(new TypeError(`pauseCmd must be a string`));
-			process.exit(1);
-		};
-		// if (typeof musicbot.enablePause !== 'boolean') {
-		// 	console.log(new TypeError(`enablePause must be a boolean`));
-		// 	process.exit(1);
-		// };
-		if (typeof musicbot.resumeCmd !== 'string') {
-			console.log(new TypeError(`resumeCmd must be a string`));
-			process.exit(1);
-		};
-		// if (typeof musicbot.enableResume !== 'boolean') {
-		// 	console.log(new TypeError(`enableResume must be a boolean`));
-		// 	process.exit(1);
-		// };
-		if (typeof musicbot.volumeCmd !== 'string') {
-			console.log(new TypeError(`volumeCmd must be a string`));
-			process.exit(1);
-		};
-		// if (typeof musicbot.enableVolume !== 'boolean') {
-		// 	console.log(new TypeError(`enableVolume must be a boolean`));
-		// 	process.exit(1);
-		// };
-		if (typeof musicbot.leaveCmd !== 'string') {
-			console.log(new TypeError(`leaveCmd must be a string`));
-			process.exit(1);
-		};
-		// if (typeof musicbot.enableLeave !== 'boolean') {
-		// 	console.log(new TypeError(`enableLeave must be a boolean`));
-		// 	process.exit(1);
-		// };
-		if (typeof musicbot.clearCmd !== 'string') {
-			console.log(new TypeError(`clearCmd must be a string`));
-			process.exit(1);
-		};
-		// if (typeof musicbot.enableClear !== 'boolean') {
-		// 	console.log(new TypeError(`enableClear must be a boolean`));
-		// 	process.exit(1);
-		// };
-		if (typeof musicbot.loopCmd !== 'string') {
-			console.log(new TypeError(`loopCmd must be a string`));
-			process.exit(1);
-		};
-		// if (typeof musicbot.enableLoop !== 'boolean') {
-		// 	console.log(new TypeError(`enableLoop must be a boolean`));
-		// 	process.exit(1);
-		// };
-
-		//musicbot.enableQueueStat errors.
-		if (typeof musicbot.enableQueueStat !== 'boolean') {
-			console.log(new TypeError(`enableQueueStat must be a boolean`));
-			process.exit(1);
-		};
-
-		//musicbot.anyoneCanAdjust errors.
-		if (typeof musicbot.anyoneCanAdjust !== 'boolean') {
-			console.log(new TypeError(`anyoneCanAdjust must be a boolean`));
-			process.exit(1);
-		};
-
-		if (typeof musicbot.logging !== 'boolean') {
-			console.log(new TypeError(`logging must be a boolean`));
-			process.exit(1);
-		}
-
-		//Misc.
-		if (musicbot.global && musicbot.maxQueueSize < 50) console.warn(`global queues are enabled while maxQueueSize is below 50! Recommended to use a higher size.`);
-	};
 	checkErrors();
 
 	//Set the YouTube API key.
@@ -358,6 +147,9 @@ module.exports = function (client, options) {
 					case musicbot.volumeCmd:
 						if (musicbot.disableVolume) return;
 						return volume(msg, suffix);
+					case 'vol':
+						if (musicbot.disableVolume) return;
+						return volume(msg, suffix);
 					case musicbot.leaveCmd:
 						if (musicbot.disableLeave) return;
 						return leave(msg, suffix);
@@ -367,6 +159,18 @@ module.exports = function (client, options) {
 					case musicbot.loopCmd:
 						if (musicbot.disableLoop) return;
 						return loop(msg, suffix);
+					case musicbot.deleteCmd:
+						if (musicbot.disableDelete) return;
+						return deleteCmd(msg, suffix);
+					case 'del':
+						if (musicbot.disableDelete) return;
+						return deleteCmd(msg, suffix);
+					case musicbot.nowPlayingCmd:
+						if (musicbot.disableNowPlaying) return;
+						return getNowPlaying(msg);
+					case 'current':
+						if (musicbot.disableNowPlaying) return;
+						return getNowPlaying(msg);
 				}
 				if (musicbot.clearInvoker) {
 					msg.delete();
@@ -376,19 +180,6 @@ module.exports = function (client, options) {
 			console.error(`There was a general error in the bot. Error: ${error}`);
 		};
 	});
-
-	/**
-	 * Live message function.
-	 */
-	if (musicbot.enableAliveMessage) {
-		 setInterval(function liveMessage() {
-			 if (musicbot.aliveMessage.length < 2) {
-				 musicbot.aliveMessage = "----------------------------------\n"+client.user.username+" online since "+client.readyAt+"!"+"\n----------------------------------";
-			 }
-
-			 console.log(musicbot.aliveMessage);
-		 }, musicbot.aliveMessageTime);
-	};
 
 	/**
 	 * Checks if a user is a mod.
@@ -445,6 +236,21 @@ module.exports = function (client, options) {
 	}
 
 	/**
+	 * Checks if the user can delete the song.
+	 *
+	 * @param {GuildMember} member - The guild member
+	 * @param {array} queue - The current queue
+	 * @param {array} song - The song to delete
+	 * @returns {boolean} - If the user can delete
+	 */
+	function canDelete(member, queue, toDelete) {
+		if (queue[toDelete].requester === member.id) return true;
+		else if (isMod(member)) return true;
+		else if (isDJ(member)) return true;
+		else return false;
+	}
+
+	/**
 	 * Checks if the user can adjust volume.
 	 *
 	 * @param {GuildMember} member - The guild member
@@ -482,22 +288,24 @@ module.exports = function (client, options) {
 	 */
 	function musicbothelp(msg, suffix) {
 		if (!suffix || suffix.includes('help')) {
-			 const embed = new Discord.RichEmbed();
-			 embed.setAuthor("Commands", msg.author.displayAvatarURL)
-			 embed.setDescription(`Commands with a * require Admin or DJ perms. Use \`${musicbot.botPrefix}${musicbot.helpCmd} <command>\` for help on usage.`)
-			 embed.addField(musicbot.helpCmd, `Displays this text.`)
-			 if (!musicbot.disablePlay) embed.addField(musicbot.playCmd, `Queue a song/playlist by url or search for a song.`)
-			 if (!musicbot.disableSkip) embed.addField(musicbot.skipCmd, `* Skip a song or multiple songs.`)
-			 if (!musicbot.disableQueue) embed.addField(musicbot.queueCmd, `Shows the current queue`)
-			 if (!musicbot.disablePause) embed.addField(musicbot.pauseCmd, `* Pauses the queue.`)
-			 if (!musicbot.disableResume) embed.addField(musicbot.resumeCmd, `* Resume the queue.`)
-			 if (!musicbot.disableVolume) embed.addField(musicbot.volumeCmd, `* Adjusts the volume of the bot.`)
-			 if (!musicbot.disableLeave) embed.addField(musicbot.leaveCmd, `* Stops music and clears the queue.`)
-			 if (!musicbot.disableClear) embed.addField(musicbot.clearCmd, `* Clears the current queue.`)
-			 embed.setColor(0x27e33d)
-			 msg.member.user.send({embed});
+			const embed = new Discord.RichEmbed();
+			embed.setAuthor("Commands", msg.author.displayAvatarURL)
+			embed.setDescription(`Commands with a * require Mod or DJ perms. Use \`${musicbot.botPrefix}${musicbot.helpCmd} <command>\` for help on usage.`)
+			embed.addField(musicbot.helpCmd, `Displays this text.`)
+			if (!musicbot.disablePlay) embed.addField(musicbot.playCmd, `Queue a song/playlist by url or search for a song.`)
+			if (!musicbot.disableSkip) embed.addField(musicbot.skipCmd, `* Skip a song or multiple songs.`)
+			if (!musicbot.disableQueue) embed.addField(musicbot.queueCmd, `Shows the current queue`)
+			if (!musicbot.disablePause) embed.addField(musicbot.pauseCmd, `* Pauses the queue.`)
+			if (!musicbot.disableResume) embed.addField(musicbot.resumeCmd, `* Resume the queue.`)
+			if (!musicbot.disableVolume) embed.addField(musicbot.volumeCmd, `* Adjusts the volume of the bot.`)
+			if (!musicbot.disableLeave) embed.addField(musicbot.leaveCmd, `* Stops music and clears the queue.`)
+			if (!musicbot.disableClear) embed.addField(musicbot.clearCmd, `* Clears the current queue.`)
+			if (!musicbot.disableDelete) embed.addField(musicbot.deleteCmd, `* Deletes the specified song from the queue.`)
+			if (!musicbot.disableNowPlaying) embed.addField(musicbot.nowPlayingCmd, `Shows current song playing.`)
+			embed.setColor(0x27e33d)
+			msg.member.user.send({embed});
 		} else {
-			if (suffix.includes(musicbot.playCmd)) {
+			if (suffix === musicbot.playCmd) {
 				if (musicbot.disablePlay) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 				const embed = new Discord.RichEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.playCmd}`, client.user.displayAvatarURL);
@@ -511,61 +319,75 @@ module.exports = function (client, options) {
 	 			embed.setDescription(`Skips the playing song or multi songs. You must be the person that queued the song to skip it, or a DJ or an Admin.\n**__Usage:__** ${musicbot.botPrefix}${musicbot.skipCmd} [numer of songs]`);
 				embed.setColor(0x27e33d);
 	 			msg.member.user.send({embed});
-		} else if (suffix.includes(musicbot.queueCmd)) {
+			} else if (suffix.includes(musicbot.queueCmd)) {
 				if (musicbot.disableQueue) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 				const embed = new Discord.RichEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.queueCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Displays the current queue.`);
 				embed.setColor(0x27e33d);
 				msg.member.user.send({embed});
-		} else if (suffix.includes(musicbot.pauseCmd)) {
+			} else if (suffix.includes(musicbot.pauseCmd)) {
 				if (musicbot.disablePause) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 				const embed = new Discord.RichEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.pauseCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Pauses the current queue. You must be a DJ or an Admin.`);
 				embed.setColor(0x27e33d);
 				msg.member.user.send({embed});
-		} else if (suffix.includes(musicbot.resumeCmd)) {
+			} else if (suffix.includes(musicbot.resumeCmd)) {
 				if (musicbot.disableResume) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 				const embed = new Discord.RichEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.resumeCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Resumes the current queue if paused. You must be a DJ or an Admin.`);
 				embed.setColor(0x27e33d);
 				msg.member.user.send({embed});
-		} else if (suffix.includes(musicbot.volumeCmd)) {
+			} else if (suffix.includes(musicbot.volumeCmd)) {
 				if (musicbot.disableVolume) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 				const embed = new Discord.RichEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.volumeCmd}`, client.user.displayAvatarURL);
-				embed.setDescription(`Adjusts the streams volume. You must be a DJ or an Admin.\n**__Usage:__** ${musicbot.botPrefix}${musicbot.volumeCmd} <1 to 200>`);
+				embed.setDescription(`Adjusts the streams volume. You must be a DJ or an Admin.\n**__Usage:__** ${musicbot.botPrefix}${musicbot.volumeCmd} <1 to 100>`);
 				embed.setColor(0x27e33d);
 				msg.member.user.send({embed});
-		} else if (suffix.includes(musicbot.leaveCmd)) {
+			} else if (suffix.includes(musicbot.leaveCmd)) {
 				if (musicbot.disableLeave) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 				const embed = new Discord.RichEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.leaveCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Leaves the voice channel and clears the queue. You must be an Admin.`);
 				embed.setColor(0x27e33d);
 				msg.member.user.send({embed});
-		} else if (suffix.includes(musicbot.clearCmd)) {
+			} else if (suffix.includes(musicbot.clearCmd)) {
 				if (musicbot.disableClear) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 				const embed = new Discord.RichEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.clearCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Clears the current queue playing. You must be an Admin.`);
 				embed.setColor(0x27e33d);
 				msg.member.user.send({embed});
-		} else if (suffix.includes(musicbot.loopCmd)) {
+			} else if (suffix.includes(musicbot.loopCmd)) {
 				if (musicbot.disableLoop) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 				const embed = new Discord.RichEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.loopCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Enables/disables looping of the currently being played song. You must be an Admin.`);
 				embed.setColor(0x27e33d);
 				msg.member.user.send({embed});
-		} else {
-			msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
+			} else if (suffix.includes(musicbot.deleteCmd)) {
+				if (musicbot.disableDelete) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
+				const embed = new Discord.RichEmbed();
+				embed.setAuthor(`${musicbot.botPrefix}${musicbot.deleteCmd}`, client.user.displayAvatarURL);
+				embed.setDescription(`Deletes specified song from the queue. You must be a DJ or an Admin or the person who requested the song.\n**__Usage:__** ${musicbot.botPrefix}${musicbot.deleteCmd} <Song Number>`);
+				embed.setColor(0x27e33d);
+				msg.member.user.send({embed});
+			} else if (suffix.includes(musicbot.nowPlayingCmd)) {
+				if (musicbot.disableNowPlaying) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
+				const embed = new Discord.RichEmbed();
+				embed.setAuthor(`${musicbot.botPrefix}${musicbot.nowPlayingCmd}`, client.user.displayAvatarURL);
+				embed.setDescription(`Shows what song is currently playing.\n**__Usage:__** ${musicbot.botPrefix}${musicbot.nowPlayingCmd}`);
+				embed.setColor(0x27e33d);
+				msg.member.user.send({embed});
+			} else {
+				msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
+			};
 		};
-	};
 
-};
+	};
 
 	/**
 	 * The command for adding a song to the queue.
@@ -576,7 +398,7 @@ module.exports = function (client, options) {
 	 */
 	function play(msg, suffix) {
 		// Make sure the user is in a voice channel or is Mod/DJ
-		if (isMod(msg.member) || isDJ(msg.member) || msg.member.voiceChannel.id === musicbot.musicVoiceChannelId) {
+		if (isMod(msg.member) || isDJ(msg.member) || (msg.member.voiceChannel && msg.member.voiceChannel.id === musicbot.musicVoiceChannelId)) {
 			if (isAuthorizedChannel(msg)) {
 				// Make sure the suffix exists.
 				if (!suffix) return msg.channel.send(note('fail', 'No video specified!'));
@@ -585,7 +407,7 @@ module.exports = function (client, options) {
 				const queue = getQueue(msg.guild.id);
 
 				// Check if the queue has reached its maximum size.
-				if (queue.length >= musicbot.maxQueueSize) {
+				if ((queue.length >= musicbot.maxQueueSize) && !isMod(msg.member)) {
 					return msg.channel.send(note('fail', 'Maximum queue size reached!'));
 				}
 
@@ -688,10 +510,6 @@ module.exports = function (client, options) {
 		// Resume and stop playing.
 		try {
 			const dispatcher = voiceConnection.player.dispatcher;
-			if (!dispatcher || dispatcher === null) {
-				if (musicbot.logging) console.log(`-----------------------------------\ndispatcher fail (testing alert)\n-----------------------------------`);
-				return;
-			};
 			if (voiceConnection.paused) dispatcher.resume();
 			dispatcher.end();
 		} catch (e) {
@@ -762,6 +580,25 @@ module.exports = function (client, options) {
 			}
 		} catch (error) {
 			console.error(new Error(`Play command error from userID ${msg.author.id} in guildID ${msg.guild.id}\n${error.stack}`));
+			return;
+		};
+	}
+
+	/**
+	 * The command for listing the first song in the queue.
+	 *
+	 * @param {Message} msg - Original message.
+	 */
+	function getNowPlaying(msg) {
+		try {
+			if (!isAuthorizedChannel(msg)) {
+				return msg.member.user.send(note('fail', 'This command can only be run in the #music-discussion channel.'));
+			}
+			// Get the queue.
+			const queue = getQueue(msg.guild.id);
+			return msg.channel.send(note('note', `Now Playing: ${queue[0].title}`));
+		} catch (error) {
+			console.error(new Error(`Unable to get Now Playing: Initiator: ${msg.author.id} in guildID: ${msg.guild.id}\n${error.stack}`));
 			return;
 		};
 	}
@@ -861,9 +698,9 @@ module.exports = function (client, options) {
 
 		if (isMod(msg.member) || isDJ(msg.member)) {
 			// Resume.
-			msg.channel.send(note('note', 'Playback resumed.'));
 			const dispatcher = voiceConnection.player.dispatcher;
 			if (dispatcher.paused) dispatcher.resume();
+			msg.channel.send(note('note', 'Playback resumed.'));
 		} else {
 			msg.member.user.send(note('fail', 'You don\'t have permission to use that command!'));
 		}
@@ -879,6 +716,10 @@ module.exports = function (client, options) {
 	function volume(msg, suffix) {
 		if (!isAuthorizedChannel(msg)) {
 			return msg.member.user.send(note('fail', 'This command can only be run in the #music-discussion channel.'));
+		}
+
+		if (!suffix) {
+			return msg.channel.send(note('note', `Volume is currently: ${musicbot.defVolume}`));
 		}
 
 		// Get the voice connection.
@@ -898,9 +739,9 @@ module.exports = function (client, options) {
 			response.delete(5000);
 		});
 
-		msg.channel.send(note('note', 'Volume set to ' + suffix));
 		dispatcher.setVolume((suffix/100));
 		musicbot.defVolume = parseInt(suffix);
+		msg.channel.send(note('note', `Volume set to: ${suffix}`));
 	}
 
 	/**
@@ -919,6 +760,48 @@ module.exports = function (client, options) {
 			msg.channel.send(note('note', 'Looping enabled! :repeat_one:'));
 		}
 	};
+
+	/**
+	 * Removes item from the queue.
+	 *
+	 * @param {Message} msg - Original message.
+	 * @param {string} suffix - Command suffix.
+	 * @returns {<promise>} - The response message.
+	 * 
+	 */
+	function deleteCmd(msg, suffix) {
+		// Get the queue.
+		const queue = getQueue(msg.guild.id);
+
+		// If no music in the queue, return.
+		if (queue.size === 0) return msg.channel.send(note('fail', 'There is no music in the queue.'));
+
+		// Get the song number to delte.
+		let toDelete = 0;
+		if (!isNaN(suffix)) {
+			toDelete = parseInt(suffix);
+			if ((toDelete >= 2) && (toDelete <= queue.length)) {
+				// Continue
+			} else {
+				return msg.channel.send(note('fail', `Please specify a number within the limit of the queue (**2** to **${queue.length}**). If you want to skip the current song please use \`-skip\` if you are the requestor, a mod, or a DJ.`));
+			}
+		} else {
+			return msg.channel.send(note('fail', `Please specify a number for what item to remove from the queue.`));
+		}
+
+		if (!canDelete(msg.member, queue, toDelete -1)) {
+			return msg.member.user.send(note('fail', 'You cannot delete this. You must be a `Mod`, `DJ`, or be the one who requested it.'));
+		}
+
+		if (!isAuthorizedChannel(msg)) {
+			return msg.member.user.send(note('fail', 'This command can only be run in the #music-discussion channel.'));
+		}
+
+		// Delete it.
+		queue.splice(toDelete -1, 1);
+
+		msg.channel.send(note('note', `Deleted #${toDelete}!`));
+	}
 
 	/**
 	 * Executes the next song in the queue.
@@ -966,8 +849,9 @@ module.exports = function (client, options) {
 			//removed currently.
 
 			// Play the video.
+			const stream = ytdl(video.link, { filter: 'audioonly' });
 			msg.channel.send(note('note', 'Now Playing: ' + video.title)).then(() => {
-				let dispatcher = connection.playStream(stream(video.link), {seek: 0, volume: (musicbot.defVolume/100)});
+				let dispatcher = connection.playStream(stream, {seek: 0, volume: (musicbot.defVolume/100)});
 
 				connection.on('error', (error) => {
 					// Skip to the next song.
@@ -984,7 +868,7 @@ module.exports = function (client, options) {
 				});
 
 				dispatcher.on('end', () => {
-					// Wait a second.
+					// Wait less than a second. - Not sure why, but was originally set to 1 second
 					setTimeout(() => {
 						if (musicbot.loop === "true") {
 							executeQueue(msg, queue);
@@ -996,10 +880,11 @@ module.exports = function (client, options) {
 								executeQueue(msg, queue);
 							}
 						}
-					}, 1000);
+					}, 250);
 				});
 			}).catch((error) => {
 				console.error(error);
+				msg.channel.send(note('fail', `There was an error playing that item.`));
 				// Remove the song from the queue.
 				queue.shift();
 				// Play the next song in the queue.
@@ -1007,6 +892,7 @@ module.exports = function (client, options) {
 			});
 		}).catch((error) => {
 			console.error(error);
+			msg.channel.send(note('fail', `There was an error playing that item.`));
 			// Remove the song from the queue.
 			queue.shift();
 			// Play the next song in the queue.
@@ -1032,4 +918,183 @@ module.exports = function (client, options) {
 			console.error(harp);
 		}
   };
+
+  	//Init errors.
+	function checkErrors() {
+		if (process.version.slice(1).split('.')[0] < 8) console.log(new Error('Node 8.0.0 or higher was not found, 8+ is recommended. You may still use your version however.'));
+		if (!musicbot.youtubeKey) {
+			console.log(new Error(`youtubeKey is required but missing`));
+			process.exit(1);
+		};
+		if (musicbot.youtubeKey && typeof musicbot.youtubeKey !== 'string') {
+			console.log(new TypeError(`youtubeKey must be a string`));
+			process.exit(1);
+		};
+
+		//Disable commands erros.
+		if (typeof musicbot.disableHelp !== 'boolean') {
+			console.log(new TypeError(`disableHelp must be a boolean`));
+			process.exit(1);
+		}
+		if (typeof musicbot.disablePlay !== 'boolean') {
+			console.log(new TypeError(`disablePlay must be a boolean`));
+			process.exit(1);
+		}
+		if (typeof musicbot.disableSkip !== 'boolean') {
+			console.log(new TypeError(`disableSkip must be a boolean`));
+			process.exit(1);
+		}
+		if (typeof musicbot.disableDelete !== 'boolean') {
+			console.log(new TypeError(`disableDelete must be a boolean`));
+			process.exit(1);
+		}
+		if (typeof musicbot.disableQueue !== 'boolean') {
+			console.log(new TypeError(`disableQueue must be a boolean`));
+			process.exit(1);
+		}
+		if (typeof musicbot.disablePause !== 'boolean') {
+			console.log(new TypeError(`disablePause must be a boolean`));
+			process.exit(1);
+		}
+		if (typeof musicbot.disableResume !== 'boolean') {
+			console.log(new TypeError(`disableResume must be a boolean`));
+			process.exit(1);
+		}
+		if (typeof musicbot.disableLeave !== 'boolean') {
+			console.log(new TypeError(`disableLeave must be a boolean`));
+			process.exit(1);
+		}
+		if (typeof musicbot.disableClear !== 'boolean') {
+			console.log(new TypeError(`disableClear must be a boolean`));
+			process.exit(1);
+		}
+		if (typeof musicbot.disableLoop !== 'boolean') {
+			console.log(new TypeError(`disableLoop must be a boolean`));
+			process.exit(1);
+		}
+
+		//Owner errors.
+		if (typeof musicbot.ownerOverMember !== 'boolean') {
+			console.log(new TypeError(`ownerOverMember must be a boolean`));
+			process.exit(1);
+		};
+		if (musicbot.ownerOverMember && typeof musicbot.botOwner !== 'string') {
+			console.log(new TypeError(`botOwner must be a string`));
+			process.exit(1);
+		};
+
+		//musicbot.botPrefix errors.
+		if (typeof musicbot.botPrefix !== 'string') {
+			console.log(new TypeError(`prefix must be a string`));
+			process.exit(1);
+		};
+		if (musicbot.botPrefix.length < 1 || musicbot.botPrefix.length > 10) {
+			console.log(new RangeError(`prefix length must be between 1 and 10`));
+			process.exit(1);
+		};
+
+		//musicbot.global errors.
+		if (typeof musicbot.global !== 'boolean') {
+			console.log(new TypeError(`global must be a boolean`));
+			process.exit(1);
+		};
+
+		//musicbot.maxQueueSize errors.
+		if (typeof musicbot.maxQueueSize !== 'number') {
+			console.log(new TypeError(`maxQueueSize must be a number`));
+			process.exit(1);
+		};
+		if (!Number.isInteger(musicbot.maxQueueSize) || musicbot.maxQueueSize < 1) {
+			console.log(new TypeError(`maxQueueSize must be an integer more than 0`));
+			process.exit(1);
+		};
+
+		//DEFAULT_VOLUME errors.
+		if (typeof musicbot.defVolume !== 'number') {
+			console.log(new TypeError(`defaultVolume must be a number`));
+			process.exit(1);
+		};
+		if (!Number.isInteger(musicbot.defVolume) || musicbot.defVolume < 1 || musicbot.defVolume > 200) {
+			console.log(new TypeError(`defaultVolume must be an integer between 1 and 200`));
+			process.exit(1);
+		};
+
+		//musicbot.anyoneCanSkip errors.
+		if (typeof musicbot.anyoneCanSkip !== 'boolean') {
+			console.log(new TypeError(`anyoneCanSkip must be a boolean`));
+			process.exit(1);
+		};
+
+		//CLEAR_INVOKER errors.
+		if (typeof musicbot.clearInvoker !== 'boolean') {
+			console.log(new TypeError(`clearInvoker must be a boolean`));
+			process.exit(1);
+		};
+
+		//Command name errors.
+		if (typeof musicbot.helpCmd !== 'string') {
+			console.log(new TypeError(`helpCmd must be a string`));
+			process.exit(1);
+		};
+		if (typeof musicbot.playCmd !== 'string') {
+			console.log(new TypeError(`playCmd must be a string`));
+			process.exit(1);
+		};
+		if (typeof musicbot.skipCmd !== 'string') {
+			console.log(new TypeError(`skipCmd must be a string`));
+			process.exit(1);
+		};
+		if (typeof musicbot.deleteCmd !== 'string') {
+			console.log(new TypeError(`deleteCmd must be a string`));
+			process.exit(1);
+		};
+		if (typeof musicbot.queueCmd !== 'string') {
+			console.log(new TypeError(`queueCmd must be a string`));
+			process.exit(1);
+		};
+		if (typeof musicbot.pauseCmd !== 'string') {
+			console.log(new TypeError(`pauseCmd must be a string`));
+			process.exit(1);
+		};
+		if (typeof musicbot.resumeCmd !== 'string') {
+			console.log(new TypeError(`resumeCmd must be a string`));
+			process.exit(1);
+		};
+		if (typeof musicbot.volumeCmd !== 'string') {
+			console.log(new TypeError(`volumeCmd must be a string`));
+			process.exit(1);
+		};
+		if (typeof musicbot.leaveCmd !== 'string') {
+			console.log(new TypeError(`leaveCmd must be a string`));
+			process.exit(1);
+		};
+		if (typeof musicbot.clearCmd !== 'string') {
+			console.log(new TypeError(`clearCmd must be a string`));
+			process.exit(1);
+		};
+		if (typeof musicbot.loopCmd !== 'string') {
+			console.log(new TypeError(`loopCmd must be a string`));
+			process.exit(1);
+		};
+
+		//musicbot.enableQueueStat errors.
+		if (typeof musicbot.enableQueueStat !== 'boolean') {
+			console.log(new TypeError(`enableQueueStat must be a boolean`));
+			process.exit(1);
+		};
+
+		//musicbot.anyoneCanAdjust errors.
+		if (typeof musicbot.anyoneCanAdjust !== 'boolean') {
+			console.log(new TypeError(`anyoneCanAdjust must be a boolean`));
+			process.exit(1);
+		};
+
+		if (typeof musicbot.logging !== 'boolean') {
+			console.log(new TypeError(`logging must be a boolean`));
+			process.exit(1);
+		}
+
+		//Misc.
+		if (musicbot.global && musicbot.maxQueueSize < 50) console.warn(`global queues are enabled while maxQueueSize is below 50! Recommended to use a higher size.`);
+	};
 }
