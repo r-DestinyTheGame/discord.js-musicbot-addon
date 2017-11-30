@@ -138,6 +138,9 @@ module.exports = function (client, options) {
 					case musicbot.queueCmd:
 						if (musicbot.disableQueue) return;
 						return listQueue(msg, suffix);
+					case 'q':
+						if (musicbot.disableQueue) return;
+						return listQueue(msg, suffix);
 					case musicbot.pauseCmd:
 						if (musicbot.disablePause) return;
 						return pause(msg, suffix);
@@ -447,6 +450,22 @@ module.exports = function (client, options) {
 
 						})
 					} else {
+						if (suffix.includes('20171129bungiepodcast')) {
+							var results = {};
+
+							// results.link = '/Users/Mike/Development/rDestinyTheGame/Sweeper-Bot/storage/podcast.mp3'; // Dev link
+							results.link = '/opt/skynet/Discord/sweeper-prod/storage/podcast.mp3'; // Prod link
+							results.title = 'The Bungie Podcast – November 2017';
+							results.description = 'Join Luke Smith, Mark Noseworthy, and Eric Osborne as they sound off on the state of Destiny 2, what it takes to update the game, and where we’re heading next.';
+							results.requester = msg.author.id;
+
+							response.edit(note('note', 'Queued: ' + results.title)).then(() => {
+								queue.push(results);
+								// Play if only one element in the queue.
+								if (queue.length === 1) executeQueue(msg, queue);
+							}).catch(console.log);
+							return;
+						}
 						search(searchstring, opts, function(err, results) {
 							if (err) {
 								if (musicbot.logging) console.log(err);
@@ -849,7 +868,12 @@ module.exports = function (client, options) {
 			//removed currently.
 
 			// Play the video.
-			const stream = ytdl(video.link, { filter: 'audioonly' });
+			var stream = null;
+			if (video.link.includes('youtube.com')) {
+				stream = ytdl(video.link, { filter: 'audioonly' });
+			} else {
+				stream = video.link;
+			}
 			msg.channel.send(note('note', 'Now Playing: ' + video.title)).then(() => {
 				let dispatcher = connection.playStream(stream, {seek: 0, volume: (musicbot.defVolume/100)});
 
