@@ -4,10 +4,10 @@
  * Tweeked by D0cR3d.
  */
 
-const ytdl = require('ytdl-core');
+var Downloader = require('filedownloader');
+var YoutubeMp3Downloader = require('youtube-mp3-downloader');
+const YouTubeAPI = require("discord-youtube-api");
 
-const search = require('youtube-search');
-const playlistInfo = require('youtube-playlist-info');
 // const {Client} = require('discord.js');
 const Discord = require('discord.js');
 const EventEmitter = require('events');
@@ -20,26 +20,10 @@ const emitter = new Emitter();
   * Thanks to Rodabaugh for helping with some tweaks and ideas.
   *
   * @param {Client} client - The discord.js client.
-  * @param {object} options - Options to configure the client bot. Acceptable options are:
-  * 							prefix: The prefix to use for the commands (default '!').
-  * 							global: Whether to use a global queue instead of a server-specific queue (default false).
-  * 							maxQueueSize: The maximum queue size (default 20).
-  * 							anyoneCanSkip: Allow anybody to skip the song.
-  *							anyoneCanAdjust: Allow anyone to adjust volume.
-  * 							clearInvoker: Clear the command message.
-  * 							volume: The default volume of the player.
-  *							helpCmd: Name of the help command (defualt: clienthelp).
-  *							playCmd: Sets the play command name.
-  *							skipCmd: Sets the skip command name.
-  *							queueCmd: Sets the queue command name.
-  *							pauseCmd: Sets the name for the pause command.
-  *							resumeCmd: Sets the name for the resume command.
-  *							volumeCmd: Sets the name for the volume command.
-  *							leaveCmd:  Sets the name for the leave command.
-  *							clearCmd: Sets the name for the clear command.
-  *							enableQueueStat: Disables or enables queue status (useful to prevent errors sometimes, defaults true).
+  * @param {object} options - Options to configure the client bot.
+  *
+  * Refer to the readme.md and the code for full list of options supported.
   */
-	//note that I'm too lazy to update those ^, refer to the readme.md instead.
 
 module.exports = function (client, options) {
 	// Get all options.
@@ -47,6 +31,10 @@ module.exports = function (client, options) {
 		constructor(client, options) {
 			this.youtubeKey = (options && options.youtubeKey);
 			this.musicVoiceChannelId = (options && options.musicVoiceChannelId);
+
+			// Inits YouTube API
+			this.youtubeAPI = new YouTubeAPI(this.youtubeKey);
+
 			this.botPrefix = (options && options.prefix) || '!';
 			this.global = (options && options.global) || false;
 			this.maxQueueSize = parseInt((options && options.maxQueueSize) || 20);
@@ -96,7 +84,7 @@ module.exports = function (client, options) {
 			this.ownerOverMember = (options && options.ownerOverMember) || false;
 			this.botOwner = (options && options.botOwner) || null;
 			this.logging = (options && options.logging) || false;
-			this.loop = "false";
+			this.loop = 'false';
 		}
 	}
 
@@ -174,6 +162,8 @@ module.exports = function (client, options) {
 					case 'current':
 						if (musicbot.disableNowPlaying) return;
 						return getNowPlaying(msg);
+					case 'modplay':
+						return modSpecialAddToQueue(msg, suffix);
 				}
 				if (musicbot.clearInvoker) {
 					msg.delete();
@@ -191,7 +181,7 @@ module.exports = function (client, options) {
 	 * @returns {boolean} -
 	 */
 	function isMod(member) {
-		return member.hasPermission("MANAGE_GUILD");
+		return member.hasPermission('MANAGE_GUILD');
 	}
 
 	/**
@@ -232,7 +222,6 @@ module.exports = function (client, options) {
 	function canSkip(member, queue) {
 		if (musicbot.ownerOverMember && member.id === musicbot.botOwner) return true;
 		if (musicbot.anyoneCanSkip) return true;
-		else if (queue[0].requester === member.id) return true;
 		else if (isMod(member)) return true;
 		else if (isDJ(member)) return true;
 		else return false;
@@ -292,7 +281,7 @@ module.exports = function (client, options) {
 	function musicbothelp(msg, suffix) {
 		if (!suffix || suffix.includes('help')) {
 			const embed = new Discord.RichEmbed();
-			embed.setAuthor("Commands", msg.author.displayAvatarURL)
+			embed.setAuthor('Commands', msg.author.displayAvatarURL)
 			embed.setDescription(`Commands with a * require Mod or DJ perms. Use \`${musicbot.botPrefix}${musicbot.helpCmd} <command>\` for help on usage.`)
 			embed.addField(musicbot.helpCmd, `Displays this text.`)
 			if (!musicbot.disablePlay) embed.addField(musicbot.playCmd, `Queue a song/playlist by url or search for a song.`)
@@ -318,10 +307,10 @@ module.exports = function (client, options) {
 			} else if (suffix.includes(musicbot.skipCmd)) {
 				if (musicbot.disableSkip) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 				const embed = new Discord.RichEmbed();
-	 			embed.setAuthor(`${musicbot.botPrefix}${musicbot.skipCmd}`, client.user.displayAvatarURL);
-	 			embed.setDescription(`Skips the playing song or multi songs. You must be the person that queued the song to skip it, or a DJ or an Admin.\n**__Usage:__** ${musicbot.botPrefix}${musicbot.skipCmd} [numer of songs]`);
+				embed.setAuthor(`${musicbot.botPrefix}${musicbot.skipCmd}`, client.user.displayAvatarURL);
+				embed.setDescription(`Skips the playing song or multi songs. You must be a DJ or an Admin.\n**__Usage:__** ${musicbot.botPrefix}${musicbot.skipCmd} [numer of songs]`);
 				embed.setColor(0x27e33d);
-	 			msg.member.user.send({embed});
+				msg.member.user.send({embed});
 			} else if (suffix.includes(musicbot.queueCmd)) {
 				if (musicbot.disableQueue) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 				const embed = new Discord.RichEmbed();
@@ -389,7 +378,6 @@ module.exports = function (client, options) {
 				msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
 			};
 		};
-
 	};
 
 	/**
@@ -399,12 +387,12 @@ module.exports = function (client, options) {
 	 * @param {string} suffix - Command suffix.
 	 * @returns {<promise>} - The response edit.
 	 */
-	function play(msg, suffix) {
+	function play(msg, requestQuery) {
 		// Make sure the user is in a voice channel or is Mod/DJ
 		if (isMod(msg.member) || isDJ(msg.member) || (msg.member.voiceChannel && msg.member.voiceChannel.id === musicbot.musicVoiceChannelId)) {
 			if (isAuthorizedChannel(msg)) {
-				// Make sure the suffix exists.
-				if (!suffix) return msg.channel.send(note('fail', 'No video specified!'));
+				// Make sure the requestQuery exists.
+				if (!requestQuery) return msg.channel.send(note('fail', 'No video specified!'));
 
 				// Get the queue.
 				const queue = getQueue(msg.guild.id);
@@ -415,75 +403,35 @@ module.exports = function (client, options) {
 				}
 
 				// Get the video information.
-				msg.channel.send(note('note', 'Searching...')).then(response => {
-					var searchstring = suffix
-					if (searchstring.includes('?list=')) {
-						response.edit(note('note', 'Playlist detected! Fetching...')).then(response => {
-							//Get the playlist ID.
-							const playid = searchstring.toString().split('?list=')[1];
+				msg.channel.send(note('note', 'Searching...'))
+					.then(newMsg => {
+						if (requestQuery.includes('?list=')) {
+							newMsg.edit(note('fail', 'Sorry, playlists are not supported at this time.'))
+								.then(() => {
+									return;
+								}).catch((error) => { console.error(error); });
+						} else if (requestQuery.includes('youtube.com') || requestQuery.includes('youtu.be')) {
+							// Get by URL
+							musicbot.youtubeAPI.getVideo(requestQuery)
+								.then(videoData => {
+									downloadHandler(videoData, msg, newMsg);
 
-							//Get info on the playlist.
-							playlistInfo(musicbot.youtubeKey, playid).then(playlistItems => {
-								const newItems = Array.from(playlistItems);
-								var skippedVideos = new Array();
-								var queuedVids = new Array();
+								}).catch((error) => { 
+									newMsg.channel.send(note('fail', `Error retrieving that link. \n${error}\n---\n**Request Query:** ${requestQuery}`));
+									console.error(error);
+								});
+						} else {
+							// Search for it
+							musicbot.youtubeAPI.searchVideos(requestQuery)
+								.then(videoData => {
+									downloadHandler(videoData, msg, newMsg);
 
-								for (var i = 0; i < newItems.length; i++) {
-									var results = newItems[i];
-									if (queue.length > musicbot.maxQueueSize) {
-										skippedVideos.push(results.title);
-									} else {
-										results.link = `https://www.youtube.com/watch?v=` + newItems[i].resourceId.videoId;
-										results.description = " ";
-										results.requester = msg.author.id;
-
-										queue.push(results);
-										queuedVids.push(results.title);
-										if (queue.length === 1) executeQueue(msg, queue);
-									};
-								};
-								function endrun() {
-									listQueue(msg, '')
-								};
-								setTimeout(endrun, 5000);
-							});
-
-						})
-					} else {
-						if (suffix.includes('20171129bungiepodcast')) {
-							var results = {};
-
-							// results.link = '/Users/Mike/Development/rDestinyTheGame/Sweeper-Bot/storage/podcast.mp3'; // Dev link
-							results.link = '/opt/skynet/Discord/sweeper-prod/storage/podcast.mp3'; // Prod link
-							results.title = 'The Bungie Podcast – November 2017';
-							results.description = 'Join Luke Smith, Mark Noseworthy, and Eric Osborne as they sound off on the state of Destiny 2, what it takes to update the game, and where we’re heading next.';
-							results.requester = msg.author.id;
-
-							response.edit(note('note', 'Queued: ' + results.title)).then(() => {
-								queue.push(results);
-								// Play if only one element in the queue.
-								if (queue.length === 1) executeQueue(msg, queue);
-							}).catch(console.log);
-							return;
+								}).catch((error) => { 
+									newMsg.channel.send(note('fail', `Error searching for that item. \n${error}\n---\n**Request Query:** ${requestQuery}`));
+									console.error(error);
+								});
 						}
-						search(searchstring, opts, function(err, results) {
-							if (err) {
-								if (musicbot.logging) console.log(err);
-								const nerr = err.toString().split(':');
-								return response.edit(note('fail', `error occoured!\`\`\`\n${nerr[0]}: ${nerr[1]}\n\`\`\``));
-							};
-
-							// console.log(results[0]);
-							results[0].requester = msg.author.id;
-
-							response.edit(note('note', 'Queued: ' + results[0].title)).then(() => {
-								queue.push(results[0]);
-								// Play if only one element in the queue.
-								if (queue.length === 1) executeQueue(msg, queue);
-							}).catch(console.log);
-						});
-				};
-				}).catch(console.log);
+					}).catch((error) => { console.error(error); });
 			} else {
 				return msg.member.user.send(note('fail', 'This command can only be run in the #music-discussion channel.'));
 			}
@@ -492,6 +440,246 @@ module.exports = function (client, options) {
 		}			
 	}
 
+	/**
+	 * The MOD command for adding a specifc URL to the queue.
+	 *
+	 * @param {Message} msg - Original message.
+	 * @param {string} suffix - Command suffix.
+	 * @returns {<promise>} - The response edit.
+	 */
+	function modSpecialAddToQueue(msg, suffix) {
+		// Make sure the user is in a voice channel or is Mod/DJ
+		if (isMod(msg.member)) {
+
+			// Make sure the suffix exists.
+			if (!suffix) return msg.channel.send(note('fail', 'No link specified!'));
+
+			// Get the queue.
+			const queue = getQueue(msg.guild.id);
+
+			// Check if the queue has reached its maximum size.
+			if ((queue.length >= musicbot.maxQueueSize) && !isMod(msg.member)) {
+				return msg.channel.send(note('fail', 'Maximum queue size reached!'));
+			}
+
+			// Get the video information.
+			msg.channel.send(note('note', 'Searching...')).then(response => {
+				var results = {};
+				if (suffix.includes('bungiepodcast')) {
+					results.link = 'https://discord.gg/DestinyReddit';
+					// results.fileLink = '/Users/Mike/Development/rDestinyTheGame/Sweeper-Bot/storage/podcast.mp3'; // Dev link
+					results.fileLink = '/opt/skynet/Discord/sweeper-prod/storage/podcast.mp3'; // Prod link
+					results.title = 'The Bungie Podcast – November 2017';
+					results.description = 'Join Luke Smith, Mark Noseworthy, and Eric Osborne as they sound off on the state of Destiny 2, what it takes to update the game, and where we’re heading next.';
+					results.length = 'unknown';
+					results.durationSeconds = 0;
+					results.requesterName = `${msg.author.username}#${msg.author.discriminator}`;
+					results.requester = msg.author.id;
+
+					response.edit(note('note', 'Queued: ' + results.title)).then(() => {
+						queue.push(results);
+						// Play if only one element in the queue.
+						if (queue.length === 1) executeQueue(msg, queue);
+					}).catch(console.log);
+					return;
+				} else {
+					const timestamp = Math.round((new Date()).getTime() / 1000);
+					const fileExt = suffix.substring(suffix.lastIndexOf('.')+1);
+
+					results.timestamp = timestamp;
+					results.fileExt = fileExt;
+					results.link = suffix;
+					results.fileLink = `/tmp/${timestamp}.${fileExt}`;
+					results.title = 'This link was queued by a Mod - No title available';
+					results.description = 'This link was queued by a Mod - No description available';
+					results.length = 'unknown';
+					results.durationSeconds = 0;
+					results.requesterName = `${msg.author.username}#${msg.author.discriminator}`;
+					results.requester = msg.author.id;
+
+					downloadFile(response, results);
+	
+				};
+			}).catch(console.log);
+		} else {
+			return msg.member.user.send(note('fail', 'This command can only be run in the #music-discussion channel.'));
+		}		
+	}
+
+	/**
+	* Downloads file and queue's once download finished.
+	*/
+	function downloadFile(response, results) {
+		var fileDownload = new Downloader({
+			url: results.link,
+			saveas: `${results.timestamp}.${results.fileExt}`,
+			saveto: '/tmp/'
+		});
+
+		fileDownload.on('start', function(){
+			response.edit('Download started: ' + results.title);
+		});
+
+		fileDownload.on('progress', function(progress){
+			response.edit('Download progress: ' + progress.progress + '% for: ' + results.title);
+		});
+
+		fileDownload.on('error', function(error){
+			return response.edit('Download error: ' + error);
+		});
+
+		fileDownload.on('end', function(){
+			response.edit(note('note', 'Download finished. Queued: ' + results.title)).then(() => {
+				// Get the queue.
+				const queue = getQueue(response.guild.id);
+				queue.push(results);
+				// Play if only one element in the queue.
+				if (queue.length === 1) executeQueue(response, queue);
+			}).catch(console.log);
+			return;
+		});
+	}
+
+	/**
+	* Download handler.
+	*/
+	function downloadHandler(videoData, origMsg, newMsg) {
+
+		videoData.timestamp = Math.round(new Date().getTime());
+		videoData.fileExt = 'mp3';
+		videoData.link = `https://www.youtube.com/watch?v=${videoData.id}`;
+		videoData.fileLink = `/tmp/${videoData.timestamp}.${videoData.fileExt}`;
+		videoData.requesterName = `${origMsg.author.username}#${origMsg.author.discriminator}`;
+		videoData.requester = origMsg.author.id;
+
+		downloadYT(newMsg, videoData)
+			.then(() => {
+				// download complete
+				newMsg.edit(note('note', 'Download finished. Queued: ' + videoData.title)).then(() => {
+					// Get the queue.
+					const queue = getQueue(origMsg.guild.id);
+					queue.push(videoData);
+					// Play if only one element in the queue.
+					if (queue.length === 1) {
+						return executeQueue(origMsg, queue);
+					};
+				}).catch((error) => { console.error(error); });
+			}).catch((error) => { console.error(error); });
+	}
+
+	/**
+	* Downloads a YT link and queue's once download finished.
+	*/
+	function downloadYT(newMsg, video) {
+		return new Promise((resolve, reject) => {
+			//Configure YoutubeMp3Downloader with your settings 
+			var fileDownload = new YoutubeMp3Downloader({
+				// D0cR3d's FFMPEG path
+				'ffmpegPath': '/usr/local/bin/ffmpeg',  // Where is the FFmpeg binary located? 
+				// Brahma Server FFMPEG path
+				// 'ffmpegPath': '/usr/bin/ffmpeg',
+				'outputPath': '/tmp',    				// Where should the downloaded and encoded files be stored? 
+				'youtubeVideoQuality': 'highest',       // What video quality should be used? 
+				'queueParallelism': 5,                  // How many parallel downloads/encodes should be started? 
+				'progressTimeout': 2000                 // How long should be the interval of the progress reports 
+			});
+			 
+			//Download video and save as MP3 file 
+			fileDownload.download(video.id, `${video.timestamp}.${video.fileExt}`);
+			 
+			fileDownload.on('progress', function(progress) {
+				newMsg.edit('Download progress: ' + progress.progress.percentage.toFixed(2) + '% for: ' + video.title);
+			});
+
+			fileDownload.on('error', function(error) {
+				console.error(error);
+				newMsg.edit(note('fail', `Download failed for: ${video.title}\n\nError:\n${error}`));
+				return reject(new Error(`Download failed for: ${video.title}\n\nError:\n${error}`));
+			});
+
+			fileDownload.on('finished', function(err, data) {
+				return resolve(video);
+			});
+		});
+	}
+
+	/**
+	 * Executes the next song in the queue.
+	 *
+	 * @param {Message} msg - Original message.
+	 * @param {object} queue - The song queue for this server.
+	 * @returns {<promise>} - The voice channel.
+	 */
+	function executeQueue(msg, queue) {
+		// If the queue is empty, finish.
+		if (queue.length === 0) {
+			msg.channel.send(note('note', 'Playback finished.'));
+
+			// Leave the voice channel.
+			const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
+			if (voiceConnection !== null) return voiceConnection.disconnect();
+		}
+
+		new Promise((resolve, reject) => {
+			// Join the voice channel if not already in one.
+			const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
+			if (voiceConnection === null) {
+
+				const musicVoiceChannel = client.channels.get(musicbot.musicVoiceChannelId);
+				// Connect to the voice channel
+				if (musicVoiceChannel) {
+					musicVoiceChannel.join().then(connection => {
+						resolve(connection);
+					}).catch((error) => { console.error(error); });
+				} else {
+					// Otherwise, clear the queue and do nothing.
+					queue.splice(0, queue.length);
+					reject();
+				}
+			} else {
+				resolve(voiceConnection);
+			}
+		}).then(connection => {
+			// Play the video.
+			
+			getNowPlaying(msg);
+			let dispatcher = connection.playFile(queue[0].fileLink, {seek: 0, volume: (musicbot.defVolume/100), bitrate: 'auto'});
+
+			connection.on('error', (error) => {
+				// Skip to the next song.
+				console.error(error);
+				queue.shift();
+				executeQueue(msg, queue);
+			});
+
+			dispatcher.on('error', (error) => {
+				// Skip to the next song.
+				console.error(error);
+				queue.shift();
+				executeQueue(msg, queue);
+			});
+
+			dispatcher.on('end', () => {
+				if (musicbot.loop === 'true') {
+					executeQueue(msg, queue);
+				} else {
+					if (queue.length > 0) {
+						// Move to next song
+						queue.shift();
+						executeQueue(msg, queue);
+					}
+				}
+			});
+			
+		}).catch((error) => {
+			console.error(error);
+			msg.channel.send(note('fail', `There was an error playing that item.`));
+			// Remove the song from the queue.
+			queue.shift();
+			// Play the next song in the queue.
+			executeQueue(msg, queue);
+		});
+	}
 
 	/**
 	 * The command for skipping a song.
@@ -508,7 +696,7 @@ module.exports = function (client, options) {
 		// Get the queue.
 		const queue = getQueue(msg.guild.id);
 
-		if (!canSkip(msg.member, queue)) return msg.member.user.send(note('fail', 'You cannot skip this. You must be a `Mod`, `DJ`, or be the one who requested it.')).then((response) => {
+		if (!canSkip(msg.member, queue)) return msg.member.user.send(note('fail', 'You cannot skip this. You must be a `Mod` or a `DJ`.')).then((response) => {
 			response.delete(7000);
 		});
 
@@ -554,51 +742,28 @@ module.exports = function (client, options) {
 			// Get the queue.
 			const queue = getQueue(msg.guild.id);
 
-			// Get the queue text.
-			const text = queue.map((video, index) => (
-				(index + 1) + ': ' + video.title
-			)).join('\n');
-			if (text.length > 1900) {
-				const newText = text.substr(0, 1899);
-				const otherText = text.substr(1900, text.length);
-				if (otherText.length > 1900) {
-					msg.channel.send(note('wrap', 'Queue ('+ queueStatus +'):\n' + "Past character limit..."));
-				} else {
-					if (musicbot.enableQueueStat) {
-						//Get the status of the queue.
-						let queueStatus = 'Stopped';
-						const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
-						if (voiceConnection !== null) {
-							const dispatcher = voiceConnection.player.dispatcher;
-							queueStatus = dispatcher.paused ? 'Paused' : 'Playing';
-						}
-
-						// Send the queue and status.
-						msg.channel.send(note('wrap', 'Queue ('+ queueStatus +'):\n' + newText));
-						msg.channel.send(note('wrap', 'Queue (2) ('+ queueStatus +'):\n' + otherText));
+			if (queue[0]){
+				// Get the queue text.
+				const embed = new Discord.RichEmbed();
+				embed.setThumbnail('https://cdn1.iconfinder.com/data/icons/appicns/513/appicns_iTunes.png');
+				embed.setColor('RED');
+				var totalQueueTime = null;
+				queue.map(function (video, index) {
+					totalQueueTime += video.durationSeconds;
+					if (index === 25) {
+						// skip
 					} else {
-						msg.channel.send(note('wrap', 'Queue:\n' + newText));
-						msg.channel.send(note('wrap', 'Queue (2):\n' + otherText));
+						embed.addField(`${index + 1}: ${video.title.substr(0, 250)}`, `Duration: ${video.length} | Requested By: <@!${video.requester}>`);
 					}
-				};
+				});
+				const formatted = secondsToHMS(totalQueueTime);
+				embed.setTitle(`Total Music Queue Time: ${formatted}`);
+				msg.channel.send({ embed: embed });
 			} else {
-				if (musicbot.enableQueueStat) {
-					//Get the status of the queue.
-					let queueStatus = 'Stopped';
-					const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
-					if (voiceConnection !== null) {
-						const dispatcher = voiceConnection.player.dispatcher;
-						queueStatus = dispatcher.paused ? 'Paused' : 'Playing';
-					}
-
-					// Send the queue and status.
-					msg.channel.send(note('wrap', 'Queue ('+ queueStatus +'):\n' + text));
-				} else {
-					msg.channel.send(note('wrap', 'Queue:\n' + text));
-				}
+				return msg.channel.send(note('fail', 'The queue is currently empty. Use `-play <YouTube Link|Search Query>` to add something.'));
 			}
 		} catch (error) {
-			console.error(new Error(`Play command error from userID ${msg.author.id} in guildID ${msg.guild.id}\n${error.stack}`));
+			console.error(new Error(`List Queue error from userID ${msg.author.id} in guildID ${msg.guild.id}\n${error.stack}`));
 			return;
 		};
 	}
@@ -615,7 +780,19 @@ module.exports = function (client, options) {
 			}
 			// Get the queue.
 			const queue = getQueue(msg.guild.id);
-			return msg.channel.send(note('note', `Now Playing: ${queue[0].title}`));
+			if (queue[0]){
+				const embed = new Discord.RichEmbed();
+				embed.setAuthor(`Currently Playing:`, 'https://cdn1.iconfinder.com/data/icons/appicns/513/appicns_iTunes.png');
+				embed.setTitle(queue[0].title.substr(0, 235));
+				embed.setURL(queue[0].link);
+				embed.setThumbnail(queue[0].thumbnail);
+				embed.setColor('RED');
+				embed.setFooter(`Duration: ${queue[0].length} | Vol: ${musicbot.defVolume}% | Requested By: ${queue[0].requesterName}`);
+				
+				return msg.channel.send({ embed: embed });
+			} else {
+				return msg.channel.send(note('fail', 'There isn\'t anything playing. Use `-play <YouTube Link|Search Query>` to add something.'));
+			}
 		} catch (error) {
 			console.error(new Error(`Unable to get Now Playing: Initiator: ${msg.author.id} in guildID: ${msg.guild.id}\n${error.stack}`));
 			return;
@@ -771,11 +948,11 @@ module.exports = function (client, options) {
 	 * @param {string} suffix - Command suffix.
 	 */
 	function loop(msg, suffix) {
-		if (musicbot.loop === "true") {
-			musicbot.loop = "false";
+		if (musicbot.loop === 'true') {
+			musicbot.loop = 'false';
 			msg.channel.send(note('note', 'Looping disabled! :arrow_forward:'));
-		} else if (musicbot.loop === "false") {
-			musicbot.loop = "true";
+		} else if (musicbot.loop === 'false') {
+			musicbot.loop = 'true';
 			msg.channel.send(note('note', 'Looping enabled! :repeat_one:'));
 		}
 	};
@@ -822,108 +999,6 @@ module.exports = function (client, options) {
 		msg.channel.send(note('note', `Deleted #${toDelete}!`));
 	}
 
-	/**
-	 * Executes the next song in the queue.
-	 *
-	 * @param {Message} msg - Original message.
-	 * @param {object} queue - The song queue for this server.
-	 * @returns {<promise>} - The voice channel.
-	 */
-	function executeQueue(msg, queue) {
-		// If the queue is empty, finish.
-		if (queue.length === 0) {
-			msg.channel.send(note('note', 'Playback finished.'));
-
-			// Leave the voice channel.
-			const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
-			if (voiceConnection !== null) return voiceConnection.disconnect();
-		}
-
-		new Promise((resolve, reject) => {
-			// Join the voice channel if not already in one.
-			const voiceConnection = client.voiceConnections.find(val => val.channel.guild.id == msg.guild.id);
-			if (voiceConnection === null) {
-
-				const musicVoiceChannel = client.channels.get(musicbot.musicVoiceChannelId);
-				// Connect to the voice channel
-				if (musicVoiceChannel) {
-					musicVoiceChannel.join().then(connection => {
-						resolve(connection);
-					}).catch((error) => {
-						console.log(error);
-					});
-				} else {
-					// Otherwise, clear the queue and do nothing.
-					queue.splice(0, queue.length);
-					reject();
-				}
-			} else {
-				resolve(voiceConnection);
-			}
-		}).then(connection => {
-			// Get the first item in the queue.
-			const video = queue[0];
-
-			// console.log(video.webpage_url);
-			//removed currently.
-
-			// Play the video.
-			var stream = null;
-			if (video.link.includes('youtube.com')) {
-				stream = ytdl(video.link, { filter: 'audioonly' });
-			} else {
-				stream = video.link;
-			}
-			msg.channel.send(note('note', 'Now Playing: ' + video.title)).then(() => {
-				let dispatcher = connection.playStream(stream, {seek: 0, volume: (musicbot.defVolume/100)});
-
-				connection.on('error', (error) => {
-					// Skip to the next song.
-					console.error(error);
-					queue.shift();
-					executeQueue(msg, queue);
-				});
-
-				dispatcher.on('error', (error) => {
-					// Skip to the next song.
-					console.error(error);
-					queue.shift();
-					executeQueue(msg, queue);
-				});
-
-				dispatcher.on('end', () => {
-					// Wait less than a second. - Not sure why, but was originally set to 1 second
-					setTimeout(() => {
-						if (musicbot.loop === "true") {
-							executeQueue(msg, queue);
-						} else {
-							if (queue.length > 0) {
-								// Remove the song from the queue.
-								queue.shift();
-								// Play the next song in the queue.
-								executeQueue(msg, queue);
-							}
-						}
-					}, 250);
-				});
-			}).catch((error) => {
-				console.error(error);
-				msg.channel.send(note('fail', `There was an error playing that item.`));
-				// Remove the song from the queue.
-				queue.shift();
-				// Play the next song in the queue.
-				executeQueue(msg, queue);
-			});
-		}).catch((error) => {
-			console.error(error);
-			msg.channel.send(note('fail', `There was an error playing that item.`));
-			// Remove the song from the queue.
-			queue.shift();
-			// Play the next song in the queue.
-			executeQueue(msg, queue);
-		});
-	}
-
 	//Text wrapping and cleaning.
 	function note(type, text) {
 		if (type === 'wrap') {
@@ -941,9 +1016,21 @@ module.exports = function (client, options) {
 			const harp = new Error(`${type} was an invalid type; note function`);
 			console.error(harp);
 		}
-  };
+	}
 
-  	//Init errors.
+	function secondsToHMS(duration) {
+		duration = Number(duration);
+		var h = Math.floor(duration / 3600);
+		var m = Math.floor(duration % 3600 / 60);
+		var s = Math.floor(duration % 3600 % 60);
+
+		var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
+		var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
+		var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+		return hDisplay + mDisplay + sDisplay; 
+	}
+
+	//Init errors.
 	function checkErrors() {
 		if (process.version.slice(1).split('.')[0] < 8) console.log(new Error('Node 8.0.0 or higher was not found, 8+ is recommended. You may still use your version however.'));
 		if (!musicbot.youtubeKey) {
