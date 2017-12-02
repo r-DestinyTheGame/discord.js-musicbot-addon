@@ -575,9 +575,9 @@ module.exports = function (client, options) {
 			//Configure YoutubeMp3Downloader with your settings 
 			var fileDownload = new YoutubeMp3Downloader({
 				// D0cR3d's FFMPEG path
-				'ffmpegPath': '/usr/local/bin/ffmpeg',  // Where is the FFmpeg binary located? 
+				// 'ffmpegPath': '/usr/local/bin/ffmpeg',  // Where is the FFmpeg binary located? 
 				// Brahma Server FFMPEG path
-				// 'ffmpegPath': '/usr/bin/ffmpeg',
+				'ffmpegPath': '/usr/bin/ffmpeg',
 				'outputPath': '/tmp',    				// Where should the downloaded and encoded files be stored? 
 				'youtubeVideoQuality': 'highest',       // What video quality should be used? 
 				'queueParallelism': 5,                  // How many parallel downloads/encodes should be started? 
