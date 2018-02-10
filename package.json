@@ -9,7 +9,7 @@
   "dependencies": {
     "discord-youtube-api": "^0.1.0",
     "filedownloader": "^1.2.7",
-    "youtube-mp3-downloader": "^0.5.1"
+    "youtube-mp3-downloader": "^0.5.3"
   },
   "repository": {
     "type": "git",

@@ -609,6 +609,13 @@ module.exports = function (client, options) {
 	 * @param {Message} msg - Original message.
 	 * @param {object} queue - The song queue for this server.
 	 * @returns {<promise>} - The voice channel.
+	 *
+	 * This has a known bug where if a mod starts the initial queue in another channel
+	 * then the bot will send all future 'Now Playing' or 'Playback Finished' notifications
+	 * to that channel due to it constantly self-referencing 'msg' which is the original
+	 * message that started it. Potential solution involves storing the msg object
+	 * to the queue object that the users request came in on, then passing that
+	 * 'queue[0].msg' into executeQueue().
 	 */
 	function executeQueue(msg, queue) {
 		// If the queue is empty, finish.
