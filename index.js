@@ -281,7 +281,7 @@ module.exports = function (client, options) {
 	 */
 	function musicbothelp(msg, suffix) {
 		if (!suffix || suffix.includes('help')) {
-			const embed = new Discord.RichEmbed();
+			const embed = new Discord.MessageEmbed();
 			embed.setAuthor('Commands', msg.author.displayAvatarURL)
 			embed.setDescription(`Commands with a * require Mod or DJ perms. Use \`${musicbot.botPrefix}${musicbot.helpCmd} <command>\` for help on usage.`)
 			embed.addField(musicbot.helpCmd, `Displays this text.`)
@@ -300,77 +300,77 @@ module.exports = function (client, options) {
 		} else {
 			if (suffix === musicbot.playCmd) {
 				if (musicbot.disablePlay) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
-				const embed = new Discord.RichEmbed();
+				const embed = new Discord.MessageEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.playCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Addes a song to the queue.\n**__Usage:__** ${musicbot.botPrefix}${musicbot.playCmd} Video URL | Playlist URL | search for something.`);
 				embed.setColor(0x27e33d);
 				msg.member.user.send({embed});
 			} else if (suffix.includes(musicbot.skipCmd)) {
 				if (musicbot.disableSkip) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
-				const embed = new Discord.RichEmbed();
+				const embed = new Discord.MessageEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.skipCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Skips the playing song or multi songs. You must be a DJ or an Admin.\n**__Usage:__** ${musicbot.botPrefix}${musicbot.skipCmd} [numer of songs]`);
 				embed.setColor(0x27e33d);
 				msg.member.user.send({embed});
 			} else if (suffix.includes(musicbot.queueCmd)) {
 				if (musicbot.disableQueue) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
-				const embed = new Discord.RichEmbed();
+				const embed = new Discord.MessageEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.queueCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Displays the current queue.`);
 				embed.setColor(0x27e33d);
 				msg.member.user.send({embed});
 			} else if (suffix.includes(musicbot.pauseCmd)) {
 				if (musicbot.disablePause) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
-				const embed = new Discord.RichEmbed();
+				const embed = new Discord.MessageEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.pauseCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Pauses the current queue. You must be a DJ or an Admin.`);
 				embed.setColor(0x27e33d);
 				msg.member.user.send({embed});
 			} else if (suffix.includes(musicbot.resumeCmd)) {
 				if (musicbot.disableResume) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
-				const embed = new Discord.RichEmbed();
+				const embed = new Discord.MessageEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.resumeCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Resumes the current queue if paused. You must be a DJ or an Admin.`);
 				embed.setColor(0x27e33d);
 				msg.member.user.send({embed});
 			} else if (suffix.includes(musicbot.volumeCmd)) {
 				if (musicbot.disableVolume) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
-				const embed = new Discord.RichEmbed();
+				const embed = new Discord.MessageEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.volumeCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Adjusts the streams volume. You must be a DJ or an Admin.\n**__Usage:__** ${musicbot.botPrefix}${musicbot.volumeCmd} <1 to 100>`);
 				embed.setColor(0x27e33d);
 				msg.member.user.send({embed});
 			} else if (suffix.includes(musicbot.leaveCmd)) {
 				if (musicbot.disableLeave) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
-				const embed = new Discord.RichEmbed();
+				const embed = new Discord.MessageEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.leaveCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Leaves the voice channel and clears the queue. You must be an Admin.`);
 				embed.setColor(0x27e33d);
 				msg.member.user.send({embed});
 			} else if (suffix.includes(musicbot.clearCmd)) {
 				if (musicbot.disableClear) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
-				const embed = new Discord.RichEmbed();
+				const embed = new Discord.MessageEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.clearCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Clears the current queue playing. You must be an Admin.`);
 				embed.setColor(0x27e33d);
 				msg.member.user.send({embed});
 			} else if (suffix.includes(musicbot.loopCmd)) {
 				if (musicbot.disableLoop) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
-				const embed = new Discord.RichEmbed();
+				const embed = new Discord.MessageEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.loopCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Enables/disables looping of the currently being played song. You must be an Admin.`);
 				embed.setColor(0x27e33d);
 				msg.member.user.send({embed});
 			} else if (suffix.includes(musicbot.deleteCmd)) {
 				if (musicbot.disableDelete) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
-				const embed = new Discord.RichEmbed();
+				const embed = new Discord.MessageEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.deleteCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Deletes specified song from the queue. You must be a DJ or an Admin or the person who requested the song.\n**__Usage:__** ${musicbot.botPrefix}${musicbot.deleteCmd} <Song Number>`);
 				embed.setColor(0x27e33d);
 				msg.member.user.send({embed});
 			} else if (suffix.includes(musicbot.nowPlayingCmd)) {
 				if (musicbot.disableNowPlaying) return msg.member.user.send(note('fail', `${suffix} is not a valid command!`));
-				const embed = new Discord.RichEmbed();
+				const embed = new Discord.MessageEmbed();
 				embed.setAuthor(`${musicbot.botPrefix}${musicbot.nowPlayingCmd}`, client.user.displayAvatarURL);
 				embed.setDescription(`Shows what song is currently playing.\n**__Usage:__** ${musicbot.botPrefix}${musicbot.nowPlayingCmd}`);
 				embed.setColor(0x27e33d);
@@ -749,7 +749,7 @@ module.exports = function (client, options) {
 
 			if (queue[0]){
 				// Get the queue text.
-				const embed = new Discord.RichEmbed();
+				const embed = new Discord.MessageEmbed();
 				embed.setThumbnail('https://cdn1.iconfinder.com/data/icons/appicns/513/appicns_iTunes.png');
 				embed.setColor('RED');
 				var totalQueueTime = null;
@@ -786,7 +786,7 @@ module.exports = function (client, options) {
 			// Get the queue.
 			const queue = getQueue(msg.guild.id);
 			if (queue[0]){
-				const embed = new Discord.RichEmbed();
+				const embed = new Discord.MessageEmbed();
 				embed.setAuthor(`Currently Playing:`, 'https://cdn1.iconfinder.com/data/icons/appicns/513/appicns_iTunes.png');
 				embed.setTitle(queue[0].title.substr(0, 235));
 				embed.setURL(queue[0].link);
